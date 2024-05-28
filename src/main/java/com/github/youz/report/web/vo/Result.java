@@ -32,11 +32,29 @@ public class Result<T> implements Serializable {
         this.message = message;
     }
 
+
     /**
-     * 请求成功
+     * 返回一个表示操作成功的Result对象
+     *
+     * @param data 操作成功返回的数据
+     * @param <T>  数据的类型
+     * @return 一个包含成功状态码和成功原因的Result对象
      */
     public static <T> Result<T> success(T data) {
         return new Result<>(data, HttpStatus.OK.value(), HttpStatus.OK.getReasonPhrase());
+    }
+
+    /**
+     * 返回一个表示操作失败的Result对象。
+     *
+     * @param data    失败时返回的数据
+     * @param code    失败时返回的状态码
+     * @param message 失败时返回的错误信息
+     * @param <T>     数据类型
+     * @return 表示操作失败的Result对象
+     */
+    public static <T> Result<T> fail(T data, Integer code, String message) {
+        return new Result<>(data, code, message);
     }
 
 }

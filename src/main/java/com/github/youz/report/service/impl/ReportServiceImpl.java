@@ -1,9 +1,17 @@
 package com.github.youz.report.service.impl;
 
+import com.github.youz.report.enums.ExceptionCode;
+import com.github.youz.report.enums.OperationType;
+import com.github.youz.report.enums.ReportStatus;
+import com.github.youz.report.handler.CompositeExportHandler;
+import com.github.youz.report.handler.ExportContext;
+import com.github.youz.report.handler.ExportHandler;
+import com.github.youz.report.handler.ExportTotal;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.model.table.ReportTaskTableDef;
 import com.github.youz.report.repository.ReportTaskMapper;
 import com.github.youz.report.service.ReportService;
+import com.github.youz.report.util.JsonUtil;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
@@ -24,6 +32,8 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportTaskMapper reportTaskMapper;
 
+    private final CompositeExportHandler compositeExportHandler;
+
     @Override
     public ImportFileVO importFile(ImportFileDTO reqDTO) {
         return null;
@@ -31,7 +41,27 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ExportFileVO exportFile(ExportFileDTO reqDTO) {
-        return null;
+        // 获取导出处理器
+        ExportHandler handler = compositeExportHandler.getHandler(reqDTO.getBusinessType());
+
+        // 构建导出上下文 & 获取总条数
+        ExportContext exportContext = ExportContext.build(reqDTO);
+        ExportTotal total = handler.total(exportContext);
+
+        // 校验总条数
+        ExceptionCode.EXPORT_DATA_EMPTY.assertGtZero(total.getTotal());
+
+        // 初始化报表任务
+        ReportTask reportTask = JsonUtil.convert(reqDTO, ReportTask.class)
+                .setOpType(OperationType.EXPORT.getCode())
+                .setExecType(total.getExecType().getCode())
+                .setStatus(ReportStatus.WAIT.getCode())
+                .setContext(JsonUtil.toJson(exportContext))
+                .setFileName(total.getFileName());
+
+        // 保存报表任务
+        reportTaskMapper.insertSelective(reportTask);
+        return ExportFileVO.assemblyData(reportTask);
     }
 
     @Override
@@ -40,7 +70,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Page<ReportListVO> fileList(ReportListDTO reqDTO) {
+    public ReportListVO fileList(ReportListDTO reqDTO) {
         ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;
         QueryWrapper query = QueryWrapper.create()
                 .and(def.USER_ID.eq(reqDTO.getUserId()));

@@ -7,7 +7,6 @@ import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.ImportFileVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
 import com.github.youz.report.web.vo.ReportListVO;
-import com.mybatisflex.core.paginate.Page;
 
 public interface ReportService {
 
@@ -41,5 +40,5 @@ public interface ReportService {
      * @param reqDTO 报告列表请求DTO
      * @return 分页文件列表VO
      */
-    Page<ReportListVO> fileList(ReportListDTO reqDTO);
+    ReportListVO fileList(ReportListDTO reqDTO);
 }

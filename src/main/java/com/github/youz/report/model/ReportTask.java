@@ -1,8 +1,11 @@
 package com.github.youz.report.model;
 
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -10,13 +13,18 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @Table("report_task")
+@Accessors(chain = true)
 public class ReportTask implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     /** 关联父任务ID --> pid */
     private Long pid;
+
+    /** 分片索引(仅因数据量大而分割为子任务时存在) --> sliced_index */
+    private Long slicedIndex;
 
     /** 业务类型(1: 用户, 2: 商品...) --> business_type */
     private Integer businessType;
@@ -27,7 +35,7 @@ public class ReportTask implements Serializable {
     /** 执行类型(0: 未知, 1: 同步, 2: 异步) --> exec_type */
     private Integer execType;
 
-    /** 执行状态(0: 待执行, 5: 执行中, 10: 执行失败, 15: 生成本地文件成功, 20: 上传文件失败, 25: 已完成) --> status */
+    /** 执行状态(0: 待执行, 5: 执行中, 10: 生成本地文件成功, 15: 已完成, 50: 执行失败, 55: 上传文件失败) --> status */
     private Integer status;
 
     /** [导入|导出]上下文参数 --> context */

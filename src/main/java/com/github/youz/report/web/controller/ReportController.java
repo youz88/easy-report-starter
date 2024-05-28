@@ -5,7 +5,6 @@ import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
 import com.github.youz.report.web.vo.*;
-import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +31,7 @@ public class ReportController {
     }
 
     @PostMapping("/list")
-    public Result<Page<ReportListVO>> reportList(ReportListDTO reqDTO) {
+    public Result<ReportListVO> reportList(ReportListDTO reqDTO) {
         return Result.success(reportService.fileList(reqDTO));
     }
 }
