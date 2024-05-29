@@ -1,15 +1,14 @@
-package com.github.youz.report.handler;
+package com.github.youz.report.export.model;
 
-import com.github.youz.report.enums.ExecutionType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * 导出总数据
+ * 预导出结果
  */
 @Data
 @Accessors(chain = true)
-public class ExportTotal {
+public class PreExportResult {
 
     /**
      * 总数
@@ -19,7 +18,12 @@ public class ExportTotal {
     /**
      * 执行类型
      */
-    private ExecutionType execType;
+    private Integer execType;
+
+    /**
+     * 目录名
+     */
+    private String directoryName;
 
     /**
      * 文件名

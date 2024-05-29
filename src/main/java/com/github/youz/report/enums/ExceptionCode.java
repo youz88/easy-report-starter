@@ -18,12 +18,32 @@ import java.util.Map;
 public enum ExceptionCode {
 
     // 10000-19999 导出错误
+    /**
+     * 导出处理器不能为空
+     */
     EXPORT_HANDLER_EMPTY(10001),
 
-    EXPORT_NO_MATCH_HANDLER(10002),
+    /**
+     * 未找到业务匹配的导出处理器
+     */
+    EXPORT_NO_MATCH_BUSINESS_HANDLER(10002),
 
+    /**
+     * 导出数据为空
+     */
     EXPORT_DATA_EMPTY(10003),
 
+    /**
+     * 下载文件失败
+     */
+    EXPORT_DOWNLOAD_FAIL(10004),
+
+    /**
+     * 未找到匹配的导出链路
+     */
+    EXPORT_NO_MATCH_CHAIN(10005),
+
+    // 20000-29999 导入错误
     ;
 
     /**
@@ -80,6 +100,15 @@ public enum ExceptionCode {
     }
 
     /**
+     * 抛出异常
+     *
+     * @throws ReportException 抛出自定义异常，包含当前对象和错误信息
+     */
+    public void throwException() {
+        throw new ReportException(this, errorMessage());
+    }
+
+    /**
      * 获取错误信息
      *
      * @return 错误信息
@@ -88,4 +117,5 @@ public enum ExceptionCode {
         return ApplicationContextUtil.getBean(MessageSource.class)
                 .getMessage(String.valueOf(code), null, Locale.getDefault());
     }
+
 }

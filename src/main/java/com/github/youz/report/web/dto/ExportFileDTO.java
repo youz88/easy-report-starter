@@ -21,9 +21,9 @@ public class ExportFileDTO {
     private Integer businessType;
 
     /**
-     * 导出参数
+     * 导出查询参数
      */
-    private String params;
+    private String queryParam;
 
     /**
      * 导出字段名称和顺序

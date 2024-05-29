@@ -1,4 +1,4 @@
-package com.github.youz.report.handler;
+package com.github.youz.report.export.handler;
 
 import com.github.youz.report.enums.ExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 @DependsOn("applicationContextUtil")
 public class CompositeExportHandler {
 
-    private final Map<Integer, ExportHandler> handlerMap;
+    private final Map<Integer, ExportBusinessHandler> handlerMap;
 
     @Autowired
-    public CompositeExportHandler(List<ExportHandler> handlers) {
+    public CompositeExportHandler(List<ExportBusinessHandler> handlers) {
         ExceptionCode.EXPORT_HANDLER_EMPTY.assertNotEmpty(handlers);
 
         // 初始化处理器
@@ -31,9 +31,9 @@ public class CompositeExportHandler {
      * @param code 编号
      * @return 处理器
      */
-    public ExportHandler getHandler(int code) {
-        ExportHandler handler = handlerMap.get(code);
-        ExceptionCode.EXPORT_NO_MATCH_HANDLER.assertNotNull(handler);
+    public ExportBusinessHandler getHandler(int code) {
+        ExportBusinessHandler handler = handlerMap.get(code);
+        ExceptionCode.EXPORT_NO_MATCH_BUSINESS_HANDLER.assertNotNull(handler);
         return handler;
     }
 

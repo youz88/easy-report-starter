@@ -3,29 +3,33 @@ package com.github.youz.report.service.impl;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.OperationType;
 import com.github.youz.report.enums.ReportStatus;
-import com.github.youz.report.handler.CompositeExportHandler;
-import com.github.youz.report.handler.ExportContext;
-import com.github.youz.report.handler.ExportHandler;
-import com.github.youz.report.handler.ExportTotal;
+import com.github.youz.report.export.handler.CompositeExportHandler;
+import com.github.youz.report.export.model.ExportContext;
+import com.github.youz.report.export.handler.ExportBusinessHandler;
+import com.github.youz.report.export.model.PreExportResult;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.model.table.ReportTaskTableDef;
 import com.github.youz.report.repository.ReportTaskMapper;
 import com.github.youz.report.service.ReportService;
+import com.github.youz.report.util.ExcelExportUtil;
 import com.github.youz.report.util.JsonUtil;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
-import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.ImportFileVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
 import com.github.youz.report.web.vo.ReportListVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
 import java.util.Objects;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
@@ -40,28 +44,31 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ExportFileVO exportFile(ExportFileDTO reqDTO) {
+    public void exportFile(ExportFileDTO reqDTO, HttpServletResponse response) {
         // 获取导出处理器
-        ExportHandler handler = compositeExportHandler.getHandler(reqDTO.getBusinessType());
+        ExportBusinessHandler handler = compositeExportHandler.getHandler(reqDTO.getBusinessType());
 
-        // 构建导出上下文 & 获取总条数
-        ExportContext exportContext = ExportContext.build(reqDTO);
-        ExportTotal total = handler.total(exportContext);
+        // 获取总条数 & 构建导出上下文
+        PreExportResult preExportResult = handler.preExport(reqDTO.getQueryParam());
 
         // 校验总条数
-        ExceptionCode.EXPORT_DATA_EMPTY.assertGtZero(total.getTotal());
+        ExceptionCode.EXPORT_DATA_EMPTY.assertGtZero(preExportResult.getTotal());
 
         // 初始化报表任务
         ReportTask reportTask = JsonUtil.convert(reqDTO, ReportTask.class)
                 .setOpType(OperationType.EXPORT.getCode())
-                .setExecType(total.getExecType().getCode())
                 .setStatus(ReportStatus.WAIT.getCode())
-                .setContext(JsonUtil.toJson(exportContext))
-                .setFileName(total.getFileName());
+                .setExecType(preExportResult.getExecType())
+                .setFileName(preExportResult.getFileName())
+                .setContext(JsonUtil.toJson(ExportContext.build(preExportResult, reqDTO)))
+                .setCreateTime(Instant.now().getEpochSecond())
+                .setUpdateTime(Instant.now().getEpochSecond());
 
         // 保存报表任务
         reportTaskMapper.insertSelective(reportTask);
-        return ExportFileVO.assemblyData(reportTask);
+
+        // 执行导出
+        ExcelExportUtil.webExport(handler, reportTask, response);
     }
 
     @Override
@@ -79,5 +86,9 @@ public class ReportServiceImpl implements ReportService {
         }
         Page<ReportTask> pageInfo = reportTaskMapper.paginate(Page.of(reqDTO.getPageNum(), reqDTO.getPageSize()), query);
         return ReportListVO.assemblyData(pageInfo);
+    }
+
+    public static void main(String[] args) {
+        System.out.println();
     }
 }

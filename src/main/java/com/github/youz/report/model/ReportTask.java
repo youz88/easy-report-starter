@@ -66,8 +66,8 @@ public class ReportTask implements Serializable {
     private Integer deleted;
 
     /** 创建时间(秒) --> create_time */
-    private Integer createTime;
+    private Long createTime;
 
     /** 修改时间(秒) --> update_time */
-    private Integer updateTime;
+    private Long updateTime;
 }

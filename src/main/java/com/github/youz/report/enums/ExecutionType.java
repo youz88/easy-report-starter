@@ -25,4 +25,8 @@ public enum ExecutionType {
      * 描述
      */
     private final String message;
+
+    public static boolean isSync(int code) {
+        return SYNC.getCode() == code;
+    }
 }

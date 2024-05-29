@@ -8,6 +8,8 @@ import com.github.youz.report.web.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/report")
 @RequiredArgsConstructor
@@ -21,8 +23,8 @@ public class ReportController {
     }
 
     @PostMapping("/export")
-    public Result<ExportFileVO> exportFile(@RequestBody ExportFileDTO reqDTO) {
-        return Result.success(reportService.exportFile(reqDTO));
+    public void exportFile(@RequestBody ExportFileDTO reqDTO, HttpServletResponse response) {
+        reportService.exportFile(reqDTO, response);
     }
 
     @PostMapping("/{id}")

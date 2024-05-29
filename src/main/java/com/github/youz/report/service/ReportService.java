@@ -3,10 +3,11 @@ package com.github.youz.report.service;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
-import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.ImportFileVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
 import com.github.youz.report.web.vo.ReportListVO;
+
+import javax.servlet.http.HttpServletResponse;
 
 public interface ReportService {
 
@@ -19,12 +20,12 @@ public interface ReportService {
     ImportFileVO importFile(ImportFileDTO reqDTO);
 
     /**
-     * 导出文件方法
+     * 导出文件
      *
-     * @param reqDTO 导出文件请求DTO
-     * @return 导出文件VO
+     * @param reqDTO   导出文件请求DTO
+     * @param response 响应
      */
-    ExportFileVO exportFile(ExportFileDTO reqDTO);
+    void exportFile(ExportFileDTO reqDTO, HttpServletResponse response);
 
     /**
      * 根据文件ID获取文件信息
