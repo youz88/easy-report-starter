@@ -25,5 +25,5 @@ public class SyncExportResult {
     /**
      * 表体
      */
-    private List<String> dataList;
+    private List<List<Object>> dataList;
 }

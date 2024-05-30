@@ -23,9 +23,13 @@ public abstract class AbstractExportChain implements ExportChain {
 
     @Override
     public void handler(ReportTask reportTask) {
-        // 公共处理
-        customHandler(reportTask);
-
+        try {
+            // 自定义处理
+            customHandler(reportTask);
+        } catch (Exception e) {
+            // 异常处理
+            failBack(reportTask, e);
+        }
         if (Objects.isNull(next)) {
             return;
         }
@@ -34,9 +38,12 @@ public abstract class AbstractExportChain implements ExportChain {
         next.handler(reportTask);
     }
 
-
-    @Override
-    public void failBack(ReportTask reportTask) {
+    /**
+     * 失败回退方法
+     *
+     * @param reportTask 报表任务对象
+     */
+    protected void failBack(ReportTask reportTask, Exception e) {
 
     }
 

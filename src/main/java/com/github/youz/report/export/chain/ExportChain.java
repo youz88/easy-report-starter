@@ -25,11 +25,4 @@ public interface ExportChain {
      * @return 调用链
      */
     ExportChain getNext();
-
-    /**
-     * 失败回退方法
-     *
-     * @param reportTask 报表任务对象
-     */
-    void failBack(ReportTask reportTask);
 }

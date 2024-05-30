@@ -1,12 +1,24 @@
 package com.github.youz.report.export.handler;
 
 
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.export.model.*;
+import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.ApplicationContextUtil;
+import com.github.youz.report.util.ExcelExportUtil;
+import com.github.youz.report.util.JsonUtil;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 导出数据组装抽象类
@@ -43,7 +55,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
         return new PreExportResult()
                 .setTotal(total)
                 .setExecType(resolveExecutionType(total))
-                .setDirectoryName(UUID.randomUUID().toString())
+                .setDirectoryName(UUID.randomUUID().toString().replace(ReportConst.MINUS_SYMBOL, ReportConst.EMPTY))
                 .setFileName(businessType().getMessage());
     }
 
@@ -65,12 +77,87 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     @Override
-    public AsyncExportResult asyncExport(ExportContext context) {
+    public AsyncExportResult asyncExport(ReportTask reportTask) {
+        // 获取任务上下文
+        ExportContext context = JsonUtil.toObject(reportTask.getContext(), ExportContext.class);
+
         // 获取表头
         ExportHead exportHead = handleHead(context);
 
-//        return writeData(context, exportHead);
-        return null;
+        return writeData(reportTask, context, exportHead);
+    }
+
+    /**
+     * 生成报表文件
+     *
+     * @param reportTask 报表任务
+     * @param context    任务上下文
+     * @param exportHead 表头
+     * @return 临时文件地址
+     */
+    protected AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
+
+
+        // 构建临时文件路径
+        String tempFilePath = buildTempFilePath(context.getPreExportResult());
+
+        // 创建导出excel对象
+        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(tempFilePath)) {
+            // 创建sheet对象
+            WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName());
+
+            // 获取导出配置信息
+            ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+
+            // 初始化开始、结束、分页大小、当前页码
+            int start = (reportTask.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
+            int end = start + exportProperties.getSlicesTaskMaxSize();
+            int pageSize = getPageSize(exportProperties);
+            int pageNum = start / pageSize + 1;
+            Long total = context.getPreExportResult().getTotal();
+
+            // 分页查询追加表体数据
+            ExportData exportData;
+            for (int i = start; i < end && i <= total; i += pageSize) {
+                // 设置查询参数: 分页大小、当前页码、行号
+                context.setRowIndex(i - start + ReportConst.ONE)
+                        .setPageNum(pageNum++)
+                        .setPageSize(pageSize);
+
+                // 查询导出数据
+                exportData = this.handleData(context);
+
+                // 导出数据为空，跳过
+                if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
+                    break;
+                }
+
+                // 追加行数据
+                writer.write(exportData.getDataList(), sheet);
+
+                // 线程睡眠
+                sleep();
+            }
+
+            // 末尾追加数据
+            List<List<?>> totalDataList = appendEndData(context);
+            if (CollectionUtils.isNotEmpty(totalDataList)) {
+                totalDataList.stream()
+                        .filter(CollectionUtils::isNotEmpty)
+                        .forEach(data -> writer.write(data, sheet));
+            }
+        }
+        return new AsyncExportResult();
+    }
+
+    /**
+     * 追加末尾数据
+     *
+     * @param context 导出上下文
+     * @return 末尾数据
+     */
+    protected List<List<?>> appendEndData(ExportContext context) {
+        return Collections.emptyList();
     }
 
     /**
@@ -82,101 +169,40 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
         return businessType().getMessage();
     }
 
-//    /**
-//     * 生成报表文件
-//     *
-//     * @param context    任务上下文
-//     * @param exportHead 表头
-//     * @return 临时文件地址
-//     * @throws IOException io异常
-//     */
-//    protected String writeData(ExportContext context, ExportHead exportHead) throws Exception {
-//        // 组装临时文件路径
-//        String tempFilePath = buildTempFilePath(context.getTaskId(), context.getFileName());
-//
-//        // 创建导出excel对象
-//        try (ExcelWriter writer = createExcelWriter(tempFilePath)) {
-//            // 创建sheet对象
-//            WriteSheet sheet = createWriteSheet(headTaskRespBO.getHead(), this.type().getMessage());
-//
-//            // 设置开始、结束、分页大小、当前页码
-//            int start = (context.getTaskChunk() - 1) * ExportHandlerInterface.ADD_TASK_MAX_DATA_SIZE;
-//            int end = start + ExportHandlerInterface.ADD_TASK_MAX_DATA_SIZE;
-//            context.setSize(getPageSize());
-//            context.setCurrent(start / getPageSize() + 1);
-//
-//            // 分页查询追加表体数据
-//            ExportResultBO dataTaskRespBO;
-//            for (int i = start; i < end && i <= total; i += getPageSize()) {
-//                // 行号++
-//                context.setRowIndex(i - start);
-//
-//                // 文件导出
-//                dataTaskRespBO = this.handleData(context);
-//                if (Objects.isNull(dataTaskRespBO) || Objects.isNull(dataTaskRespBO.getData())) {
-//                    break;
-//                }
-//
-//                writer.write(dataTaskRespBO.getData(), sheet);
-//
-//                // 页码++
-//                context.setCurrent(context.getCurrent() + 1);
-//
-//                // 线程睡眠
-//                sleep(context.getTargetTypeEnum());
-//            }
-//
-//            // 最后添加总计
-//            List<?> totalData = headTaskRespBO.getData();
-//            if (CollectionUtils.isNotEmpty(totalData)) {
-//                writer.write(totalData, sheet);
-//            }
-//        }
-//        return tempFilePath;
-//    }
-//
-//    /**
-//     * 构建sheet样式
-//     *
-//     * @param builder sheet构建器
-//     * @return 构建器
-//     */
-//    protected ExcelWriterSheetBuilder buildSheetStyle(ExcelWriterSheetBuilder builder) {
-//        return builder.registerWriteHandler(ExcelUtil.createExcelStyle())
-//                .registerWriteHandler(ExcelUtil.createAutoColumn());
-//    }
-//
-//    /**
-//     * 获取分页大小
-//     */
-//    protected Long getPageSize() {
-//        return ExportHandlerInterface.DEFAULT_PAGE_SIZE;
-//    }
-//
-//    /**
-//     * 生成临时文件路径[/root/export/taskId/fileName.xlsx]
-//     *
-//     * @param taskId   任务ID
-//     * @param fileName 文件名称
-//     * @return 临时文件路径
-//     */
-//    private String buildTempFilePath(Long taskId, String fileName) {
-//        return String.join(File.separator, BizConst.EXPORT_ROOT_DIRECTORY, taskId.toString(), fileName) + ExcelTypeEnum.XLSX.getValue();
-//    }
-//
-//    /**
-//     * 睡眠
-//     *
-//     * @param targetType 同步状态
-//     */
-//    private void sleep(ReportTargetTypeEnum targetType) throws InterruptedException {
-//        if (Objects.isNull(targetType) || ReportTargetTypeEnum.SYNC == targetType) {
-//            return;
-//        }
-//
-//        // 如果为异步导出，为避免服务频繁调用，睡眠100毫秒
-//        TimeUnit.MILLISECONDS.sleep(ASYNC_SLEEP_TIME);
-//    }
+    /**
+     * 获取分页大小
+     *
+     * @param exportProperties 导出配置信息
+     */
+    protected int getPageSize(ExportProperties exportProperties) {
+        return exportProperties.getPageSize();
+    }
+
+    /**
+     * 构建临时文件路径[/root/export/directoryName/fileName.xlsx]
+     *
+     * @param preExportResult 预导出结果
+     * @return 临时文件路径
+     */
+    private String buildTempFilePath(PreExportResult preExportResult) {
+        return String.join(File.separator, ReportConst.EXPORT_ROOT_DIRECTORY, preExportResult.getDirectoryName(), preExportResult.getFileName())
+                + ExcelTypeEnum.XLSX.getValue();
+    }
+
+    /**
+     * 为避免服务频繁调用，查询设置睡眠间隔时间(默认100毫秒)
+     */
+    private void sleep() {
+        long asyncTaskSleepTime = ApplicationContextUtil.getBean(ExportProperties.class).getAsyncTaskSleepTime();
+        if (asyncTaskSleepTime <= 0) {
+            return;
+        }
+        try {
+            TimeUnit.MILLISECONDS.sleep(asyncTaskSleepTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * 根据导出任务总数解析执行类型

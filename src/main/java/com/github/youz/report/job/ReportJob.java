@@ -20,7 +20,7 @@ public class ReportJob {
 
     private final ReportTaskMapper reportTaskMapper;
 
-    @Scheduled(cron = "* 0/2 * * * ?")
+    @Scheduled(cron = "0 0/2 * * * ?")
     public void exportTask() {
         // 查询待执行的任务
         ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;

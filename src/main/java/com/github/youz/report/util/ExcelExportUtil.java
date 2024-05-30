@@ -14,13 +14,12 @@ import com.github.youz.report.export.model.SyncExportResult;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.Result;
+import com.mybatisflex.core.util.ArrayUtil;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.FileUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -33,14 +32,14 @@ public class ExcelExportUtil {
     /**
      * 创建WriteSheet对象
      *
-     * @param head 表头
+     * @param headList 表头
      * @return WriteSheet
      */
-    public static WriteSheet createWriteSheet(List<List<String>> head, String sheetName) {
+    public static WriteSheet createWriteSheet(List<List<String>> headList, String sheetName) {
         return EasyExcel.writerSheet(sheetName)
                 .registerWriteHandler(ExcelStyleUtil.createExcelStyle())
                 .registerWriteHandler(ExcelStyleUtil.createAutoColumn())
-                .head(head)
+                .head(headList)
                 .build();
     }
 
@@ -49,13 +48,18 @@ public class ExcelExportUtil {
      *
      * @param tempFilePath 临时文件路径
      * @return ExcelWriter
-     * @throws IOException IO异常
      */
-    public static ExcelWriter createExcelWriter(String tempFilePath) throws IOException {
+    public static ExcelWriter createExcelWriter(String tempFilePath) {
         File tempFile = new File(tempFilePath);
-        FileUtils.forceMkdir(tempFile.getParentFile());
+        File tempDirectory = tempFile.getParentFile();
 
-        // 创建导出excel对象
+        // 如果父目录不存在，则创建父目录
+        if (!tempDirectory.exists()) {
+            boolean mkdirs = tempDirectory.mkdirs();
+            ExceptionCode.EXPORT_DATA_EMPTY.assertNotNull(mkdirs);
+        }
+
+        // 创建ExcelWriter对象并返回
         return EasyExcel.write(tempFile).build();
     }
 
@@ -83,12 +87,12 @@ public class ExcelExportUtil {
         // 根据报表任务状态获取导出步骤
         ReportExportStep reportExportStep = ReportExportStep.of(reportTask.getStatus());
         Class<? extends ExportChain>[] chainClasses = reportExportStep.getChainClasses();
-        if (chainClasses == null || chainClasses.length == 0) {
+        if (ArrayUtil.isEmpty(chainClasses)) {
             return;
         }
 
         // 创建根导出链 & 赋值临时导出链
-        ExportChain rootChain = new RootExportChain();
+        ExportChain rootChain = ApplicationContextUtil.getBean(RootExportChain.class);
         ExportChain temp = rootChain;
 
         // 遍历导出链的类数组

@@ -5,6 +5,7 @@ import com.github.youz.report.export.model.AsyncExportResult;
 import com.github.youz.report.export.model.ExportContext;
 import com.github.youz.report.export.model.PreExportResult;
 import com.github.youz.report.export.model.SyncExportResult;
+import com.github.youz.report.model.ReportTask;
 
 public interface ExportBusinessHandler {
 
@@ -27,10 +28,10 @@ public interface ExportBusinessHandler {
     /**
      * 导出 excel 文件
      *
-     * @param context 任务上下文
+     * @param reportTask 任务信息
      * @return 临时文件路径
      */
-    AsyncExportResult asyncExport(ExportContext context);
+    AsyncExportResult asyncExport(ReportTask reportTask);
 
     /**
      * 标识导出业务类型

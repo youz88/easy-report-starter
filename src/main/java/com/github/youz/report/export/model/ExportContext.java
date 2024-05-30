@@ -28,6 +28,22 @@ public class ExportContext {
      */
     private PreExportResult preExportResult;
 
+    // 仅作数据传输, 不可序列化
+    /**
+     * 分页大小
+     */
+    private transient int pageSize;
+
+    /**
+     * 当前页码
+     */
+    private transient int pageNum;
+
+    /**
+     * 当前行号
+     */
+    private transient int rowIndex;
+
     /**
      * 构建导出上下文对象
      *

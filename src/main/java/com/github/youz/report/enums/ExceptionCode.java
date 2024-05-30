@@ -1,10 +1,13 @@
 package com.github.youz.report.enums;
 
+import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.exception.ReportException;
 import com.github.youz.report.util.ApplicationContextUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.context.MessageSource;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -43,6 +46,11 @@ public enum ExceptionCode {
      */
     EXPORT_NO_MATCH_CHAIN(10005),
 
+    /**
+     * 创建文件目录失败
+     */
+    EXPORT_MKDIR_FAIL(10006),
+
     // 20000-29999 导入错误
     ;
 
@@ -70,7 +78,7 @@ public enum ExceptionCode {
      * @throws ReportException 如果传入的数字为null或小于等于0，则抛出ReportException异常
      */
     public void assertGtZero(Number number) {
-        if (number == null || number.intValue() <= 0) {
+        if (number == null || number.intValue() <= ReportConst.ZER0) {
             throw new ReportException(this, errorMessage());
         }
     }
@@ -82,7 +90,7 @@ public enum ExceptionCode {
      * @throws ReportException 如果传入的集合为空或没有元素，则抛出ReportException异常
      */
     public void assertNotEmpty(Collection<?> collection) {
-        if (collection == null || collection.isEmpty()) {
+        if (CollectionUtils.isEmpty(collection)) {
             throw new ReportException(this, errorMessage());
         }
     }
@@ -94,7 +102,19 @@ public enum ExceptionCode {
      * @throws ReportException 如果传入的Map对象为空或没有键值对，则抛出ReportException异常
      */
     public void assertNotEmpty(Map<?, ?> map) {
-        if (map == null || map.isEmpty()) {
+        if (MapUtils.isEmpty(map)) {
+            throw new ReportException(this, errorMessage());
+        }
+    }
+
+    /**
+     * 校验传入的boolean值是否为true。
+     *
+     * @param flag 需要校验的boolean值
+     * @throws ReportException 如果flag不为true，则抛出异常
+     */
+    public void assertTrue(boolean flag) {
+        if (!flag) {
             throw new ReportException(this, errorMessage());
         }
     }

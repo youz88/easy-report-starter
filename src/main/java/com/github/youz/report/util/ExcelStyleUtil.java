@@ -8,6 +8,7 @@ import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.alibaba.excel.write.style.column.AbstractColumnWidthStyleStrategy;
+import com.github.youz.report.constant.ReportConst;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -95,7 +96,7 @@ public class ExcelStyleUtil {
             }
             Map<Integer, Integer> maxColumnWidthMap = cache.computeIfAbsent(writeSheetHolder.getSheetNo(), key -> new HashMap<>(16));
             Integer columnWidth = dataLength(cellDataList, cell, isHead);
-            if (columnWidth < 0) {
+            if (columnWidth < ReportConst.ZER0) {
                 return;
             }
             if (columnWidth > maxColumnWidth) {
@@ -120,7 +121,7 @@ public class ExcelStyleUtil {
             if (isHead) {
                 return cell.getStringCellValue().getBytes(StandardCharsets.UTF_8).length;
             }
-            WriteCellData<?> cellData = cellDataList.get(0);
+            WriteCellData<?> cellData = cellDataList.get(ReportConst.ZER0);
             CellDataTypeEnum type = cellData.getType();
             if (type == null) {
                 return -1;

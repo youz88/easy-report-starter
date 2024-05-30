@@ -24,7 +24,7 @@ public class ReportTask implements Serializable {
     private Long pid;
 
     /** 分片索引(仅因数据量大而分割为子任务时存在) --> sliced_index */
-    private Long slicedIndex;
+    private Integer slicedIndex;
 
     /** 业务类型(1: 用户, 2: 商品...) --> business_type */
     private Integer businessType;
@@ -51,10 +51,10 @@ public class ReportTask implements Serializable {
     private String uploadFilePath;
 
     /** 执行时间(秒) --> exec_time */
-    private Integer execTime;
+    private Long execTime;
 
     /** 完成时间(秒) --> complete_time */
-    private Integer completeTime;
+    private Long completeTime;
 
     /** 错误描述 --> error_msg */
     private String errorMsg;
