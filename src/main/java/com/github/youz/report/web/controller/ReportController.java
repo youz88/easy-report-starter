@@ -33,7 +33,7 @@ public class ReportController {
     }
 
     @PostMapping("/list")
-    public Result<ReportListVO> reportList(ReportListDTO reqDTO) {
+    public Result<PageVO<ReportInfoVO>> reportList(ReportListDTO reqDTO) {
         return Result.success(reportService.fileList(reqDTO));
     }
 }

@@ -3,6 +3,7 @@ package com.github.youz.report.web.vo;
 import com.github.youz.report.enums.BusinessType;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.JsonUtil;
+import com.mybatisflex.core.paginate.Page;
 import lombok.Data;
 
 @Data
@@ -65,5 +66,19 @@ public class ReportInfoVO {
      */
     public static ReportInfoVO assemblyData(ReportTask reportTask) {
         return JsonUtil.convert(reportTask, ReportInfoVO.class);
+    }
+
+    /**
+     * 将分页信息组装成ReportListVO对象
+     *
+     * @param pageInfo 分页信息
+     * @return 组装后的ReportListVO对象
+     */
+    public static PageVO<ReportInfoVO> assemblyData(Page<ReportTask> pageInfo) {
+        PageVO<ReportInfoVO> pageVO = new PageVO<>();
+        return pageVO.setTotal(pageInfo.getTotalRow())
+                .setPageNum(pageInfo.getPageNumber())
+                .setPageSize(pageInfo.getPageSize())
+                .setList(JsonUtil.convertList(pageInfo.getRecords(), ReportInfoVO.class));
     }
 }

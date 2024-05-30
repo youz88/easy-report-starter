@@ -1,4 +1,4 @@
-package com.github.youz.report.export.model;
+package com.github.youz.report.export.bo.common;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,5 +25,5 @@ public class SyncExportResult {
     /**
      * 表体
      */
-    private List<List<Object>> dataList;
+    private List<?> dataList;
 }

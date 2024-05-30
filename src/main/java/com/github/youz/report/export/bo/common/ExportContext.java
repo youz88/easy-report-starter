@@ -1,9 +1,10 @@
-package com.github.youz.report.export.model;
+package com.github.youz.report.export.bo.common;
 
 import com.github.youz.report.web.dto.ExportFileDTO;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -43,6 +44,11 @@ public class ExportContext {
      * 当前行号
      */
     private transient int rowIndex;
+
+    /**
+     * 过滤字段
+     */
+    private transient List<Field> fieldList;
 
     /**
      * 构建导出上下文对象

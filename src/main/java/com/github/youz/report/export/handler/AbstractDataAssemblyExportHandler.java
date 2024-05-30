@@ -7,7 +7,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.config.ExportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.ExecutionType;
-import com.github.youz.report.export.model.*;
+import com.github.youz.report.export.bo.common.*;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.ApplicationContextUtil;
 import com.github.youz.report.util.ExcelExportUtil;
@@ -15,7 +15,7 @@ import com.github.youz.report.util.JsonUtil;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -62,18 +62,18 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     @Override
     public SyncExportResult syncExport(ExportContext context) {
         // 创建sheet名称
-        String sheetName = generateSheetName();
+        String sheetName = generateSheetName(context);
 
         // 获取表头
         ExportHead exportHead = handleHead(context);
 
-        // 获取表体
-        ExportData exportData = handleData(context);
+        // 获取表体数据
+        List<Object> dataList = assemblyMainData(context);
 
         return new SyncExportResult()
                 .setSheetName(sheetName)
                 .setHeadList(exportHead.getHeadList())
-                .setDataList(exportData.getDataList());
+                .setDataList(dataList);
     }
 
     @Override
@@ -96,76 +96,30 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      * @return 临时文件地址
      */
     protected AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
-
-
         // 构建临时文件路径
         String tempFilePath = buildTempFilePath(context.getPreExportResult());
 
-        // 创建导出excel对象
+        // 创建ExcelWriter对象(try-with-resources)
         try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(tempFilePath)) {
             // 创建sheet对象
-            WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName());
+            WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName(context));
 
-            // 获取导出配置信息
-            ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+            // 追加主体数据
+            appendMainData(writer, sheet, context, reportTask);
 
-            // 初始化开始、结束、分页大小、当前页码
-            int start = (reportTask.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
-            int end = start + exportProperties.getSlicesTaskMaxSize();
-            int pageSize = getPageSize(exportProperties);
-            int pageNum = start / pageSize + 1;
-            Long total = context.getPreExportResult().getTotal();
-
-            // 分页查询追加表体数据
-            ExportData exportData;
-            for (int i = start; i < end && i <= total; i += pageSize) {
-                // 设置查询参数: 分页大小、当前页码、行号
-                context.setRowIndex(i - start + ReportConst.ONE)
-                        .setPageNum(pageNum++)
-                        .setPageSize(pageSize);
-
-                // 查询导出数据
-                exportData = this.handleData(context);
-
-                // 导出数据为空，跳过
-                if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
-                    break;
-                }
-
-                // 追加行数据
-                writer.write(exportData.getDataList(), sheet);
-
-                // 线程睡眠
-                sleep();
-            }
-
-            // 末尾追加数据
-            List<List<?>> totalDataList = appendEndData(context);
-            if (CollectionUtils.isNotEmpty(totalDataList)) {
-                totalDataList.stream()
-                        .filter(CollectionUtils::isNotEmpty)
-                        .forEach(data -> writer.write(data, sheet));
-            }
+            // 追加尾部数据
+            appendEndData(writer, sheet, context);
         }
         return new AsyncExportResult();
     }
 
     /**
-     * 追加末尾数据
-     *
-     * @param context 导出上下文
-     * @return 末尾数据
-     */
-    protected List<List<?>> appendEndData(ExportContext context) {
-        return Collections.emptyList();
-    }
-
-    /**
      * 生成sheet名称
      *
+     * @param context 导出上下文
      * @return 返回sheet名称
      */
-    protected String generateSheetName() {
+    protected String generateSheetName(ExportContext context) {
         return businessType().getMessage();
     }
 
@@ -176,6 +130,113 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      */
     protected int getPageSize(ExportProperties exportProperties) {
         return exportProperties.getPageSize();
+    }
+
+    /**
+     * 处理末尾数据并返回ExportData对象
+     *
+     * @param context 导出上下文
+     * @return 末尾数据的ExportData对象，如果无需处理则返回null
+     */
+    protected ExportData handleEndData(ExportContext context) {
+        return null;
+    }
+
+    /**
+     * 将主数据追加到ExcelWriter中
+     *
+     * @param writer     ExcelWriter对象，用于写入数据
+     * @param sheet      WriteSheet对象，表示Excel中的一个Sheet页
+     * @param context    ExportContext对象，包含导出所需的上下文信息
+     * @param reportTask ReportTask对象，包含当前导出任务的信息
+     */
+    private void appendMainData(ExcelWriter writer, WriteSheet sheet, ExportContext context, ReportTask reportTask) {
+        // 获取导出配置信息
+        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+
+        // 初始化开始、结束、分页大小、当前页码
+        int start = (reportTask.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
+        int end = start + exportProperties.getSlicesTaskMaxSize();
+        int pageSize = getPageSize(exportProperties);
+        int pageNum = start / pageSize + 1;
+        Long total = context.getPreExportResult().getTotal();
+
+        // 分页查询追加表体数据
+        ExportData exportData;
+        for (int i = start; i < end && i <= total; i += pageSize) {
+            // 设置查询参数: 分页大小、当前页码、行号
+            context.setRowIndex(i - start + ReportConst.ONE)
+                    .setPageNum(pageNum++)
+                    .setPageSize(pageSize);
+
+            // 查询导出数据
+            exportData = handleData(context);
+
+            // 导出数据为空，跳过
+            if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
+                break;
+            }
+
+            // 追加行数据
+            writer.write(exportData.getDataList(), sheet);
+
+            // 线程睡眠
+            sleep(exportProperties);
+        }
+    }
+
+    /**
+     * 组装导出表体数据
+     *
+     * @param context 导出上下文
+     * @return 导出数据列表
+     */
+    private List<Object> assemblyMainData(ExportContext context) {
+        List<Object> dataList = new ArrayList<>();
+
+        // 初始化分页大小、当前页码、总计
+        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+        int pageNum = ReportConst.ONE;
+        int pageSize = getPageSize(exportProperties);
+        long total = context.getPreExportResult().getTotal();
+
+        // 分页查询追加表体数据
+        for (int i = ReportConst.ZER0; i <= total; i += pageSize) {
+            // 设置查询参数: 分页大小、当前页码、行号
+            context.setRowIndex(i + ReportConst.ONE)
+                    .setPageNum(pageNum++)
+                    .setPageSize(pageSize);
+
+            // 查询导出数据
+            ExportData exportData = handleData(context);
+
+            // 导出数据为空，跳过
+            if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
+                break;
+            }
+
+            // 追加表体数据
+            dataList.addAll(exportData.getDataList());
+        }
+        return dataList;
+    }
+
+    /**
+     * 向ExcelWriter追加末尾数据
+     *
+     * @param writer  ExcelWriter对象，用于写入数据
+     * @param sheet   WriteSheet对象，表示要写入数据的sheet
+     * @param context ExportContext对象，包含导出所需的上下文信息
+     */
+    private void appendEndData(ExcelWriter writer, WriteSheet sheet, ExportContext context) {
+        // 查询末尾数据
+        ExportData exportData = handleEndData(context);
+        if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
+            return;
+        }
+
+        // 追加末尾数据
+        writer.write(exportData.getDataList(), sheet);
     }
 
     /**
@@ -191,9 +252,11 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
 
     /**
      * 为避免服务频繁调用，查询设置睡眠间隔时间(默认100毫秒)
+     *
+     * @param exportProperties 导出配置信息
      */
-    private void sleep() {
-        long asyncTaskSleepTime = ApplicationContextUtil.getBean(ExportProperties.class).getAsyncTaskSleepTime();
+    private void sleep(ExportProperties exportProperties) {
+        long asyncTaskSleepTime = exportProperties.getAsyncTaskSleepTime();
         if (asyncTaskSleepTime <= 0) {
             return;
         }

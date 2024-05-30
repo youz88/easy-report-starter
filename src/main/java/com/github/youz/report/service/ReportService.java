@@ -4,8 +4,8 @@ import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
 import com.github.youz.report.web.vo.ImportFileVO;
+import com.github.youz.report.web.vo.PageVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
-import com.github.youz.report.web.vo.ReportListVO;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,7 +39,7 @@ public interface ReportService {
      * 获取文件列表分页信息
      *
      * @param reqDTO 报告列表请求DTO
-     * @return 分页文件列表VO
+     * @return 分页文件VO
      */
-    ReportListVO fileList(ReportListDTO reqDTO);
+    PageVO<ReportInfoVO> fileList(ReportListDTO reqDTO);
 }
