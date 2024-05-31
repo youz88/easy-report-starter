@@ -1,6 +1,14 @@
 package com.github.youz.report.export.chain;
 
+import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.constant.ReportConst;
+import com.github.youz.report.data.ReportTaskData;
+import com.github.youz.report.enums.ExceptionCode;
+import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.model.ReportTask;
+import com.mybatisflex.core.util.StringUtil;
+import com.mybatisflex.core.util.UpdateEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -9,10 +17,46 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
+@RequiredArgsConstructor
 public class UploadCloudFileExportChain extends AbstractExportChain {
+
+    private final ReportTaskData reportTaskData;
+
+    private final ExportProperties exportProperties;
 
     @Override
     void customHandler(ReportTask reportTask) {
+        // 配置无需上传云存储 | 当前任务为切片任务
+        if (!exportProperties.isUploadCloud() || reportTask.getPid() > ReportConst.ZER0) {
+            return;
+        }
 
+        // 上传导出文件到云空间, 返回云存储文件路径
+        String cloudFilePath = uploadFile(reportTask.getTempFilePath());
+        ExceptionCode.EXPORT_UPLOAD_FAIL.assertTrue(StringUtil.isNotBlank(cloudFilePath));
+
+        // 更新任务的上传文件路径
+        ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())
+                .setUploadFilePath(cloudFilePath);
+        reportTaskData.updateById(update);
+    }
+
+    /**
+     * 上传文件到服务器
+     *
+     * @param tempFilePath 临时文件路径
+     * @return 上传结果，如果上传失败则返回空字符串
+     */
+    protected String uploadFile(String tempFilePath) {
+        return ReportConst.EMPTY;
+    }
+
+    @Override
+    protected void failBack(ReportTask reportTask, Exception e) {
+        // 更新任务的状态为上传失败 & 记录错误信息
+        ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())
+                .setStatus(ReportStatus.FAILED_UPLOAD_FILE.getCode())
+                .setErrorMsg(e.getMessage());
+        reportTaskData.updateById(update);
     }
 }

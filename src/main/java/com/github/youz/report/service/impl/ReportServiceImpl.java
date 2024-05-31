@@ -1,5 +1,6 @@
 package com.github.youz.report.service.impl;
 
+import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.OperationType;
@@ -24,6 +25,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Log4j2
 @Service
@@ -56,10 +60,14 @@ public class ReportServiceImpl implements ReportService {
                 .setStatus(ReportStatus.WAIT.getCode())
                 .setExecType(preExportResult.getExecType())
                 .setFileName(preExportResult.getFileName())
+                .setSlicedIndex(preExportResult.getSlicedIndex())
                 .setContext(JsonUtil.toJson(ExportContext.build(preExportResult, reqDTO)));
 
         // 保存报表任务
         reportTaskData.insert(reportTask);
+
+        // 任务拆分
+        slicedReportTask(reportTask);
 
         // 执行导出
         ExcelExportUtil.webExport(handler, reportTask, response);
@@ -76,4 +84,29 @@ public class ReportServiceImpl implements ReportService {
         return ReportInfoVO.assemblyData(pageInfo);
     }
 
+    /**
+     * 将报表任务进行拆分并插入数据库
+     *
+     * @param reportTask 报表任务对象
+     */
+    private void slicedReportTask(ReportTask reportTask) {
+        // 任务拆分, 判断是否需要拆分
+        if (reportTask.getSlicedIndex() <= ReportConst.ONE) {
+            return;
+        }
+
+        // 任务拆分, 初始化异步切片任务
+        List<ReportTask> slicedTaskList = IntStream.range(ReportConst.ZER0, reportTask.getSlicedIndex())
+                .mapToObj(chunk -> {
+                    int slicedIndex = chunk + ReportConst.ONE;
+                    return JsonUtil.convert(reportTask, ReportTask.class)
+                            .setId(null)
+                            .setPid(reportTask.getId())
+                            .setSlicedIndex(slicedIndex)
+                            .setFileName(reportTask.getFileName() + ReportConst.UNDER_LINE_SYMBOL + slicedIndex);
+                }).collect(Collectors.toList());
+
+        // 批量插入切片任务
+        reportTaskData.batchInsert(slicedTaskList);
+    }
 }

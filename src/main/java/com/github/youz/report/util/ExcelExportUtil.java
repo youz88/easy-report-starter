@@ -6,11 +6,11 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.enums.ReportExportStep;
+import com.github.youz.report.export.bo.common.ExportContext;
+import com.github.youz.report.export.bo.common.SyncExportResult;
 import com.github.youz.report.export.chain.ExportChain;
 import com.github.youz.report.export.chain.RootExportChain;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
-import com.github.youz.report.export.bo.common.ExportContext;
-import com.github.youz.report.export.bo.common.SyncExportResult;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.Result;
@@ -28,40 +28,6 @@ import java.util.List;
  */
 @Log4j2
 public class ExcelExportUtil {
-
-    /**
-     * 创建WriteSheet对象
-     *
-     * @param headList 表头
-     * @return WriteSheet
-     */
-    public static WriteSheet createWriteSheet(List<List<String>> headList, String sheetName) {
-        return EasyExcel.writerSheet(sheetName)
-                .registerWriteHandler(ExcelStyleUtil.createExcelStyle())
-                .registerWriteHandler(ExcelStyleUtil.createAutoColumn())
-                .head(headList)
-                .build();
-    }
-
-    /**
-     * 创建ExcelWriter对象
-     *
-     * @param tempFilePath 临时文件路径
-     * @return ExcelWriter
-     */
-    public static ExcelWriter createExcelWriter(String tempFilePath) {
-        File tempFile = new File(tempFilePath);
-        File tempDirectory = tempFile.getParentFile();
-
-        // 如果父目录不存在，则创建父目录
-        if (!tempDirectory.exists()) {
-            boolean mkdirs = tempDirectory.mkdirs();
-            ExceptionCode.EXPORT_DATA_EMPTY.assertNotNull(mkdirs);
-        }
-
-        // 创建ExcelWriter对象并返回
-        return EasyExcel.write(tempFile).build();
-    }
 
     /**
      * 导出报表数据
@@ -103,6 +69,40 @@ public class ExcelExportUtil {
 
         // 处理导出任务
         rootChain.handler(reportTask);
+    }
+
+    /**
+     * 创建WriteSheet对象
+     *
+     * @param headList 表头
+     * @return WriteSheet
+     */
+    public static WriteSheet createWriteSheet(List<List<String>> headList, String sheetName) {
+        return EasyExcel.writerSheet(sheetName)
+                .registerWriteHandler(ExcelStyleUtil.createExcelStyle())
+                .registerWriteHandler(ExcelStyleUtil.createAutoColumn())
+                .head(headList)
+                .build();
+    }
+
+    /**
+     * 创建ExcelWriter对象
+     *
+     * @param tempFilePath 临时文件路径
+     * @return ExcelWriter
+     */
+    public static ExcelWriter createExcelWriter(String tempFilePath) {
+        File tempFile = new File(tempFilePath);
+        File tempDirectory = tempFile.getParentFile();
+
+        // 如果父目录不存在，则创建父目录
+        if (!tempDirectory.exists()) {
+            boolean mkdirs = tempDirectory.mkdirs();
+            ExceptionCode.EXPORT_DATA_EMPTY.assertNotNull(mkdirs);
+        }
+
+        // 创建ExcelWriter对象并返回
+        return EasyExcel.write(tempFile).build();
     }
 
     /**

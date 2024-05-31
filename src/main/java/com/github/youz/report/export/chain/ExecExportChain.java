@@ -21,9 +21,12 @@ public class ExecExportChain extends AbstractExportChain {
 
     @Override
     void customHandler(ReportTask reportTask) {
+        // 是否为已拆分的父任务
+        boolean isSlicedParentTask = isSlicedParentTask(reportTask);
+
         // 更新任务的状态为执行中 & 执行时间
         ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())
-                .setStatus(ReportStatus.EXECUTION.getCode())
+                .setStatus(isSlicedParentTask ? ReportStatus.UNDONE.getCode() : ReportStatus.EXECUTION.getCode())
                 .setExecTime(DateUtil.now());
         reportTaskData.updateById(update);
     }

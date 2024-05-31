@@ -11,6 +11,8 @@ public class ReportConst {
 
     public static final String MINUS_SYMBOL = "-";
 
+    public static final String UNDER_LINE_SYMBOL = "_";
+
     /**
      * 导出临时文件根目录
      */

@@ -51,6 +51,16 @@ public enum ExceptionCode {
      */
     EXPORT_MKDIR_FAIL(10006),
 
+    /**
+     * 文件上传云失败
+     */
+    EXPORT_UPLOAD_FAIL(10007),
+
+    /**
+     * 生成压缩文件失败
+     */
+    EXPORT_COMPRESSED_FAIL(10008),
+
     // 20000-29999 导入错误
     ;
 

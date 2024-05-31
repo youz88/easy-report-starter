@@ -16,7 +16,9 @@ public enum ReportStatus {
 
     LOCAL_FILE_SUCCESS(10, "生成本地文件成功"),
 
-    COMPLETED(15, "已完成"),
+    UNDONE(15, "未完成"),
+
+    COMPLETED(20, "已完成"),
 
     EXECUTION_FAILED(50, "执行失败"),
 

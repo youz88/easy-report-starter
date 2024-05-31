@@ -26,4 +26,9 @@ public class ExportProperties {
      * 为避免大量异步任务持续查询对数据库造成压力, 所以可配置查询睡眠间隔时间(毫秒)
      */
     private long asyncTaskSleepTime = 100;
+
+    /**
+     * 导出文件是否上传到云存储
+     */
+    private boolean uploadCloud = false;
 }

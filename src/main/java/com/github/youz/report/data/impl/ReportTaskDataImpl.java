@@ -4,7 +4,6 @@ import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.enums.OperationType;
-import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.model.table.ReportTaskTableDef;
 import com.github.youz.report.repository.ReportTaskMapper;
@@ -50,25 +49,40 @@ public class ReportTaskDataImpl implements ReportTaskData {
     }
 
     @Override
+    public void batchInsert(List<ReportTask> reportTaskList) {
+        reportTaskMapper.insertBatch(reportTaskList);
+    }
+
+    @Override
     public void updateById(ReportTask reportTask) {
         UpdateChain.of(ReportTask.class)
                 .set(ReportTask::getStatus, reportTask.getStatus(), Objects.nonNull(reportTask.getStatus()))
                 .set(ReportTask::getErrorMsg, reportTask.getErrorMsg(), StringUtil.isNotBlank(reportTask.getErrorMsg()))
                 .set(ReportTask::getExecTime, reportTask.getExecTime(), Objects.nonNull(reportTask.getExecTime()))
                 .set(ReportTask::getCompleteTime, reportTask.getCompleteTime(), Objects.nonNull(reportTask.getCompleteTime()))
+                .set(ReportTask::getTempFilePath, reportTask.getTempFilePath(), StringUtil.isNotBlank(reportTask.getTempFilePath()))
                 .where(ReportTask::getId).eq(reportTask.getId())
                 .update();
     }
 
     @Override
-    public List<ReportTask> scanExportTask() {
-        // 查询待执行的任务
+    public List<ReportTask> scanAsyncExportTask(List<Integer> statuses) {
         ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;
         QueryWrapper query = QueryWrapper.create()
                 .and(def.PID.eq(ReportConst.ZER0))
                 .and(def.OP_TYPE.eq(OperationType.EXPORT.getCode()))
                 .and(def.EXEC_TYPE.eq(ExecutionType.ASYNC.getCode()))
-                .and(def.STATUS.in(ReportStatus.WAIT.getCode(), ReportStatus.EXECUTION_FAILED.getCode()));
+                .and(def.STATUS.in(statuses));
+        return reportTaskMapper.selectListByQuery(query);
+    }
+
+    @Override
+    public List<ReportTask> selectSlicedByStatus(Long pid, Integer status) {
+        ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;
+        QueryWrapper query = QueryWrapper.create()
+                .select(def.ID, def.TEMP_FILE_PATH)
+                .and(def.PID.eq(pid))
+                .and(def.STATUS.eq(status));
         return reportTaskMapper.selectListByQuery(query);
     }
 }

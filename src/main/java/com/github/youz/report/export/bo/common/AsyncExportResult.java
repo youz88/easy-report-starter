@@ -10,5 +10,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AsyncExportResult {
 
-
+    /**
+     * 临时文件路径
+     */
+    String tempFilePath;
 }

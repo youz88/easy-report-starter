@@ -21,6 +21,11 @@ public class PreExportResult {
     private Integer execType;
 
     /**
+     * 分片索引(数据量大而分割为子任务时索引)
+     */
+    private Integer slicedIndex;
+
+    /**
      * 目录名
      */
     private String directoryName;

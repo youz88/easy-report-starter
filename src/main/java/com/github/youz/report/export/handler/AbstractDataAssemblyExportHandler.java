@@ -6,6 +6,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.config.ExportProperties;
 import com.github.youz.report.constant.ReportConst;
+import com.github.youz.report.enums.DateFormatType;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.export.bo.common.*;
 import com.github.youz.report.model.ReportTask;
@@ -15,9 +16,10 @@ import com.github.youz.report.util.JsonUtil;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,11 +53,13 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
 
     @Override
     public PreExportResult preExport(String queryParam) {
+        // 查询导出总数
         long total = queryTotal(queryParam);
         return new PreExportResult()
                 .setTotal(total)
                 .setExecType(resolveExecutionType(total))
-                .setDirectoryName(UUID.randomUUID().toString().replace(ReportConst.MINUS_SYMBOL, ReportConst.EMPTY))
+                .setSlicedIndex(resolveSlicedSize(total))
+                .setDirectoryName(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DateFormatType.YYYYMMDDHHMMSS.getValue())))
                 .setFileName(businessType().getMessage());
     }
 
@@ -110,7 +114,8 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
             // 追加尾部数据
             appendEndData(writer, sheet, context);
         }
-        return new AsyncExportResult();
+        return new AsyncExportResult()
+                .setTempFilePath(tempFilePath);
     }
 
     /**
@@ -240,13 +245,14 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     /**
-     * 构建临时文件路径[/root/export/directoryName/fileName.xlsx]
+     * 构建临时文件路径[/root/export/businessTypeName/directoryName/fileName.xlsx]
      *
      * @param preExportResult 预导出结果
      * @return 临时文件路径
      */
     private String buildTempFilePath(PreExportResult preExportResult) {
-        return String.join(File.separator, ReportConst.EXPORT_ROOT_DIRECTORY, preExportResult.getDirectoryName(), preExportResult.getFileName())
+        return String.join(File.separator, ReportConst.EXPORT_ROOT_DIRECTORY,
+                businessType().name().toLowerCase(), preExportResult.getDirectoryName(), preExportResult.getFileName())
                 + ExcelTypeEnum.XLSX.getValue();
     }
 
@@ -279,5 +285,22 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
 
         // 判断导出任务总数是否大于异步任务最大数量, 如果是，则返回异步执行类型；否则返回同步执行类型
         return total > exportProperties.getAsyncTaskMaxSize() ? ExecutionType.ASYNC.getCode() : ExecutionType.SYNC.getCode();
+    }
+
+    /**
+     * 解析切片大小
+     *
+     * @param total 总大小
+     * @return 切片数量
+     */
+    private Integer resolveSlicedSize(long total) {
+        // 获取导出属性配置
+        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+
+        // 计算切片数量
+        int chunkNum = (int) (total / exportProperties.getSlicesTaskMaxSize());
+        return chunkNum == 0
+                ? ReportConst.ONE
+                : total % exportProperties.getSlicesTaskMaxSize() == 0 ? chunkNum : chunkNum + 1;
     }
 }

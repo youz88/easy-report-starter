@@ -1,12 +1,15 @@
 package com.github.youz.report.export.chain;
 
+import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.model.ReportTask;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Objects;
 
 /**
  * 导出链抽象类
  */
+@Log4j2
 public abstract class AbstractExportChain implements ExportChain {
 
     /**
@@ -27,8 +30,11 @@ public abstract class AbstractExportChain implements ExportChain {
             // 自定义处理
             customHandler(reportTask);
         } catch (Exception e) {
+            log.error("导出失败", e);
+
             // 异常处理
             failBack(reportTask, e);
+            return;
         }
         if (Objects.isNull(next)) {
             return;
@@ -56,5 +62,15 @@ public abstract class AbstractExportChain implements ExportChain {
     public ExportChain setNext(ExportChain next) {
         this.next = next;
         return next;
+    }
+
+    /**
+     * 判断是否为已拆分的父任务
+     *
+     * @param reportTask 报告任务对象
+     * @return 若为已拆分的主任务则返回true，否则返回false
+     */
+    public boolean isSlicedParentTask(ReportTask reportTask) {
+        return reportTask.getPid() == ReportConst.ZER0 && reportTask.getSlicedIndex() > ReportConst.ONE;
     }
 }

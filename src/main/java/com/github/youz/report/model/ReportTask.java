@@ -23,7 +23,7 @@ public class ReportTask implements Serializable {
     /** 关联父任务ID --> pid */
     private Long pid;
 
-    /** 分片索引(仅因数据量大而分割为子任务时存在) --> sliced_index */
+    /** 分片索引(数据量大而分割为子任务时索引) --> sliced_index */
     private Integer slicedIndex;
 
     /** 业务类型(1: 用户, 2: 商品...) --> business_type */

@@ -32,6 +32,13 @@ public interface ReportTaskData {
     void insert(ReportTask reportTask);
 
     /**
+     * 批量插入报告任务
+     *
+     * @param reportTaskList 报告任务列表
+     */
+    void batchInsert(List<ReportTask> reportTaskList);
+
+    /**
      * 根据ID更新
      *
      * @param reportTask 任务对象，包含需要更新的信息
@@ -39,10 +46,19 @@ public interface ReportTaskData {
     void updateById(ReportTask reportTask);
 
     /**
-     * 扫描待执行导出任务
+     * 扫描异步导出任务
      *
+     * @param statuses 任务状态
      * @return 任务列表
      */
-    List<ReportTask> scanExportTask();
+    List<ReportTask> scanAsyncExportTask(List<Integer> statuses);
 
+    /**
+     * 根据父任务ID和状态查询数量
+     *
+     * @param pid    父任务ID
+     * @param status 任务状态
+     * @return 分片任务列表
+     */
+    List<ReportTask> selectSlicedByStatus(Long pid, Integer status);
 }
