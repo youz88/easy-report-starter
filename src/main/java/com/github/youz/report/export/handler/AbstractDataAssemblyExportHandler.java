@@ -99,7 +99,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      * @param exportHead 表头
      * @return 临时文件地址
      */
-    protected AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
+    private AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
         // 构建临时文件路径
         String tempFilePath = buildTempFilePath(context.getPreExportResult());
 

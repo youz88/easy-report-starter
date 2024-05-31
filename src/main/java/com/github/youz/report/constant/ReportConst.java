@@ -13,6 +13,8 @@ public class ReportConst {
 
     public static final String UNDER_LINE_SYMBOL = "_";
 
+    public static final String ZIP_SUFFIX_NAME = ".zip";
+
     /**
      * 导出临时文件根目录
      */

@@ -21,11 +21,6 @@ import java.util.zip.ZipOutputStream;
 public class ZipUtil {
 
     /**
-     * 文件后缀名称
-     */
-    public static final String SUFFIX_NAME = ".zip";
-
-    /**
      * 打包多个文件至zip
      *
      * @param filePaths 文件路径
@@ -41,7 +36,7 @@ public class ZipUtil {
         String directoryPath = new File(filePaths.get(ReportConst.ZER0)).getParent();
 
         // 打包至zip格式
-        String zipPath = directoryPath + File.separator + fileName + ZipUtil.SUFFIX_NAME;
+        String zipPath = directoryPath + File.separator + fileName + ReportConst.ZIP_SUFFIX_NAME;
         toZip(filePaths, zipPath);
 
         // 删除临时文件
