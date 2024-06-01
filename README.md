@@ -14,7 +14,7 @@
 
 - 确认配置文件是否需要修改(默认配置)
 
-```json
+```text
 report:
     export:
     # 默认分页大小(用于分页查询业务数据)
@@ -31,7 +31,7 @@ report:
 
 - 导出接口
 
-```json
+```text
 POST <http://localhost:8080/report/export>
 {
     # 操作用户ID(用于列表显示时过滤筛选) 非必填
