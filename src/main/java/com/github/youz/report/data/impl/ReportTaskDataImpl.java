@@ -1,6 +1,5 @@
 package com.github.youz.report.data.impl;
 
-import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.enums.OperationType;
@@ -11,6 +10,7 @@ import com.github.youz.report.util.DateUtil;
 import com.github.youz.report.web.dto.ReportListDTO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class ReportTaskDataImpl implements ReportTaskData {
 
     @Override
     public void batchInsert(List<ReportTask> reportTaskList) {
-        reportTaskMapper.insertBatch(reportTaskList);
+        Db.executeBatch(reportTaskList, reportTaskList.size(), ReportTaskMapper.class, ReportTaskMapper::insertSelective);
     }
 
     @Override
@@ -69,7 +69,6 @@ public class ReportTaskDataImpl implements ReportTaskData {
     public List<ReportTask> scanAsyncExportTask(List<Integer> statuses) {
         ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;
         QueryWrapper query = QueryWrapper.create()
-                .and(def.PID.eq(ReportConst.ZER0))
                 .and(def.OP_TYPE.eq(OperationType.EXPORT.getCode()))
                 .and(def.EXEC_TYPE.eq(ExecutionType.ASYNC.getCode()))
                 .and(def.STATUS.in(statuses));

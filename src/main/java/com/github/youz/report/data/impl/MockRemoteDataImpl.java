@@ -41,10 +41,6 @@ public class MockRemoteDataImpl implements MockRemoteData {
      * @return 模拟的订单分页数据对象
      */
     private PageVO<OrderRespDTO> mockOrderData(OrderReqDTO reqDTO) {
-        if (reqDTO.getPageNum() > 10) {
-            return new PageVO<>();
-        }
-
         // 模拟数据
         int start = (reqDTO.getPageNum() - 1) * reqDTO.getPageSize();
         int end = start + reqDTO.getPageSize();

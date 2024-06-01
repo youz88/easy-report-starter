@@ -92,33 +92,6 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     /**
-     * 生成报表文件
-     *
-     * @param reportTask 报表任务
-     * @param context    任务上下文
-     * @param exportHead 表头
-     * @return 临时文件地址
-     */
-    private AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
-        // 构建临时文件路径
-        String tempFilePath = buildTempFilePath(context.getPreExportResult());
-
-        // 创建ExcelWriter对象(try-with-resources)
-        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(tempFilePath)) {
-            // 创建sheet对象
-            WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName(context));
-
-            // 追加主体数据
-            appendMainData(writer, sheet, context, reportTask);
-
-            // 追加尾部数据
-            appendEndData(writer, sheet, context);
-        }
-        return new AsyncExportResult()
-                .setTempFilePath(tempFilePath);
-    }
-
-    /**
      * 生成sheet名称
      *
      * @param context 导出上下文
@@ -145,6 +118,33 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      */
     protected ExportData handleEndData(ExportContext context) {
         return null;
+    }
+
+    /**
+     * 生成报表文件
+     *
+     * @param reportTask 报表任务
+     * @param context    任务上下文
+     * @param exportHead 表头
+     * @return 临时文件地址
+     */
+    private AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
+        // 构建临时文件路径
+        String tempFilePath = buildTempFilePath(context.getPreExportResult().getDirectoryName(), reportTask.getFileName());
+
+        // 创建ExcelWriter对象(try-with-resources)
+        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(tempFilePath)) {
+            // 创建sheet对象
+            WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName(context));
+
+            // 追加主体数据
+            appendMainData(writer, sheet, context, reportTask);
+
+            // 追加尾部数据
+            appendEndData(writer, sheet, context);
+        }
+        return new AsyncExportResult()
+                .setTempFilePath(tempFilePath);
     }
 
     /**
@@ -247,12 +247,13 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     /**
      * 构建临时文件路径[/root/export/businessTypeName/directoryName/fileName.xlsx]
      *
-     * @param preExportResult 预导出结果
+     * @param directoryName 临时文件目录
+     * @param fileName      临时文件名称
      * @return 临时文件路径
      */
-    private String buildTempFilePath(PreExportResult preExportResult) {
+    private String buildTempFilePath(String directoryName, String fileName) {
         return String.join(File.separator, ReportConst.EXPORT_ROOT_DIRECTORY,
-                businessType().name().toLowerCase(), preExportResult.getDirectoryName(), preExportResult.getFileName())
+                businessType().name().toLowerCase(), directoryName, fileName)
                 + ExcelTypeEnum.XLSX.getValue();
     }
 

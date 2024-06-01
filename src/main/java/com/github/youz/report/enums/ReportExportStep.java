@@ -20,6 +20,9 @@ public enum ReportExportStep {
 
     COMPLETED(ReportStatus.COMPLETED.getCode(), "已完成"),
 
+    UNDONE(ReportStatus.UNDONE.getCode(), "未完成",
+            CreateLocalFileExportChain.class, UploadCloudFileExportChain.class, CompletedExportChain.class),
+
     EXECUTION_FAILED(ReportStatus.EXECUTION_FAILED.getCode(), "执行失败",
             ExecExportChain.class, CreateLocalFileExportChain.class, UploadCloudFileExportChain.class, CompletedExportChain.class),
 
