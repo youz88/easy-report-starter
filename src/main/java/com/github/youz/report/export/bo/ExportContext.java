@@ -1,4 +1,4 @@
-package com.github.youz.report.export.bo.common;
+package com.github.youz.report.export.bo;
 
 import com.github.youz.report.web.dto.ExportFileDTO;
 import lombok.Data;

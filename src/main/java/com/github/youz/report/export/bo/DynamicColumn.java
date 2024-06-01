@@ -1,4 +1,4 @@
-package com.github.youz.report.export.bo.common;
+package com.github.youz.report.export.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 @Data
 @Accessors(chain = true)
-public class DynamicColumnBO {
+public class DynamicColumn {
 
     /**
      * 表头
@@ -38,8 +38,8 @@ public class DynamicColumnBO {
      * @param head         表头
      * @return 模板子项
      */
-    public static DynamicColumnBO init(Boolean isRenderHead, Object data, String... head) {
-        DynamicColumnBO item = new DynamicColumnBO()
+    public static DynamicColumn init(Boolean isRenderHead, Object data, String... head) {
+        DynamicColumn item = new DynamicColumn()
                 .setData(data);
         if (isRenderHead) {
             item.setHead(head);

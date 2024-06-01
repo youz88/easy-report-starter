@@ -1,4 +1,4 @@
-package com.github.youz.report.export.bo.common;
+package com.github.youz.report.export.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

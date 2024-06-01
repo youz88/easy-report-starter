@@ -5,8 +5,8 @@ import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.OperationType;
 import com.github.youz.report.enums.ReportStatus;
-import com.github.youz.report.export.bo.common.ExportContext;
-import com.github.youz.report.export.bo.common.PreExportResult;
+import com.github.youz.report.export.bo.ExportContext;
+import com.github.youz.report.export.bo.PreExportResult;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
 import com.github.youz.report.model.ReportTask;
@@ -21,7 +21,6 @@ import com.github.youz.report.web.vo.PageVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
 import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {

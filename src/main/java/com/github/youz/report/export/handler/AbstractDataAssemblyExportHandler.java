@@ -8,7 +8,7 @@ import com.github.youz.report.config.ExportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.DateFormatType;
 import com.github.youz.report.enums.ExecutionType;
-import com.github.youz.report.export.bo.common.*;
+import com.github.youz.report.export.bo.*;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.ApplicationContextUtil;
 import com.github.youz.report.util.ExcelExportUtil;

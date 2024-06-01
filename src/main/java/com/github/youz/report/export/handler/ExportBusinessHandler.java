@@ -1,10 +1,10 @@
 package com.github.youz.report.export.handler;
 
 import com.github.youz.report.enums.BusinessType;
-import com.github.youz.report.export.bo.common.AsyncExportResult;
-import com.github.youz.report.export.bo.common.ExportContext;
-import com.github.youz.report.export.bo.common.PreExportResult;
-import com.github.youz.report.export.bo.common.SyncExportResult;
+import com.github.youz.report.export.bo.AsyncExportResult;
+import com.github.youz.report.export.bo.ExportContext;
+import com.github.youz.report.export.bo.PreExportResult;
+import com.github.youz.report.export.bo.SyncExportResult;
 import com.github.youz.report.model.ReportTask;
 
 public interface ExportBusinessHandler {

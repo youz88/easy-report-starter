@@ -4,7 +4,7 @@ import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ReportStatus;
-import com.github.youz.report.export.bo.common.AsyncExportResult;
+import com.github.youz.report.export.bo.AsyncExportResult;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
 import com.github.youz.report.model.ReportTask;

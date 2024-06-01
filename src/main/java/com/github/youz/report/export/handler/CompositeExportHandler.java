@@ -18,8 +18,6 @@ public class CompositeExportHandler {
 
     @Autowired
     public CompositeExportHandler(List<ExportBusinessHandler> handlers) {
-        ExceptionCode.EXPORT_HANDLER_EMPTY.assertNotEmpty(handlers);
-
         // 初始化处理器
         handlerMap = handlers.stream()
                 .collect(Collectors.toMap(handler -> handler.businessType().getCode(), Function.identity()));

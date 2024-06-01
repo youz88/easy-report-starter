@@ -1,10 +1,9 @@
-package com.github.youz.report.export.bo.common;
+package com.github.youz.report.export.bo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.github.youz.report.converter.ReportConverterLoader;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -15,9 +14,8 @@ import java.util.*;
  * 导出抽象类
  */
 @Data
-@Log4j2
 @Accessors(chain = true)
-public abstract class AbstractExportBO {
+public abstract class AbstractExportModel {
 
     /**
      * 表头
@@ -41,7 +39,7 @@ public abstract class AbstractExportBO {
      * @param fieldNames 导出字段名称和顺序
      * @return 当前对象
      */
-    public AbstractExportBO filterHead(Class<?> clazz, List<String> fieldNames) {
+    public AbstractExportModel filterHead(Class<?> clazz, List<String> fieldNames) {
         return filterHead(clazz, fieldNames, null);
     }
 
@@ -53,7 +51,7 @@ public abstract class AbstractExportBO {
      * @param exportTemplate 导出模版对象(含有动态列时需传入)
      * @return 当前对象
      */
-    public AbstractExportBO filterHead(Class<?> clazz, List<String> fieldNames, Object exportTemplate) {
+    public AbstractExportModel filterHead(Class<?> clazz, List<String> fieldNames, Object exportTemplate) {
         // 初始化表头、字段属性
         headList = new ArrayList<>(fieldNames.size());
         fieldList = new ArrayList<>(fieldNames.size());
@@ -88,7 +86,7 @@ public abstract class AbstractExportBO {
      * @param filterFieldList 过滤属性
      * @return 当前对象
      */
-    public AbstractExportBO filterData(List<Field> filterFieldList) {
+    public AbstractExportModel filterData(List<Field> filterFieldList) {
         if (CollectionUtils.isEmpty(dataList)) {
             return this;
         }
@@ -126,18 +124,18 @@ public abstract class AbstractExportBO {
             }
 
             //noinspection unchecked
-            List<DynamicColumnBO> items = (List<DynamicColumnBO>) obj;
-            for (DynamicColumnBO item : items) {
+            List<DynamicColumn> items = (List<DynamicColumn>) obj;
+            for (DynamicColumn item : items) {
                 filterHead.add(Arrays.asList(item.getHead()));
             }
-        } else if (field.getType().isAssignableFrom(DynamicColumnBO.class)) {
+        } else if (field.getType().isAssignableFrom(DynamicColumn.class)) {
             // 动态单表头
             Object obj = ReflectionUtils.getField(field, target);
             if (Objects.isNull(obj)) {
                 return;
             }
 
-            DynamicColumnBO item = (DynamicColumnBO) obj;
+            DynamicColumn item = (DynamicColumn) obj;
             filterHead.add(Arrays.asList(item.getHead()));
         } else {
             // 普通对象

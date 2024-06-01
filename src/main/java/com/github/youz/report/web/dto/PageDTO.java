@@ -8,10 +8,10 @@ public class PageDTO {
     /**
      * 当前页
      */
-    private int pageNum;
+    private int pageNum = 1;
 
     /**
      * 页大小
      */
-    private int pageSize;
+    private int pageSize = 10;
 }

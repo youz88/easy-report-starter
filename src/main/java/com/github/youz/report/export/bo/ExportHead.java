@@ -1,4 +1,4 @@
-package com.github.youz.report.export.bo.common;
+package com.github.youz.report.export.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -24,7 +24,7 @@ public class ExportHead {
      * @param context        任务上下文
      * @return 导出表头对象
      */
-    public static ExportHead assemblyData(AbstractExportBO abstractExport, ExportContext context) {
+    public static ExportHead assemblyData(AbstractExportModel abstractExport, ExportContext context) {
         // 设置过滤字段, 导出表体时使用
         context.setFieldList(abstractExport.getFieldList());
 
