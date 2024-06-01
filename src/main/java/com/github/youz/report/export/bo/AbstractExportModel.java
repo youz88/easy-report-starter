@@ -83,19 +83,20 @@ public abstract class AbstractExportModel {
     /**
      * 组装表头和表体
      *
+     * @param tplDataList     模版数据列表
      * @param filterFieldList 过滤属性
      * @return 当前对象
      */
-    public AbstractExportModel filterData(List<Field> filterFieldList) {
-        if (CollectionUtils.isEmpty(dataList)) {
+    public AbstractExportModel filterData(List<?> tplDataList, List<Field> filterFieldList) {
+        if (CollectionUtils.isEmpty(tplDataList)) {
             return this;
         }
 
         // 初始化表头、表体
-        List<List<Object>> filterData = new ArrayList<>(dataList.size());
+        List<List<Object>> filterData = new ArrayList<>(tplDataList.size());
 
         // 组装表体
-        dataList.forEach(d -> {
+        tplDataList.forEach(d -> {
             List<Object> rowData = new ArrayList<>(filterFieldList.size());
             for (Field field : filterFieldList) {
                 appendData(rowData, field, d);
