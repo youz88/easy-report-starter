@@ -134,9 +134,9 @@ GET http://localhost:8080/report/list?userId=1&businessType=1&pageNum=1&pageSize
 
 ```java
 <dependency>
-<groupId>com.github.youz</groupId>
-<artifactId>easy-report</artifactId>
-<version>1.0.0</version>
+    <groupId>com.github.youz</groupId>
+    <artifactId>easy-report</artifactId>
+    <version>1.0.0</version>
 </dependency>
 
 ```
