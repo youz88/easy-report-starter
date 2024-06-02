@@ -11,7 +11,7 @@ create table report_task
     context          json                           null comment '[导入|导出]上下文参数',
     status           int unsigned        default 0  not null comment '执行状态(0: 待执行, 5: 执行中, 10: 生成本地文件成功, 15: 已完成, 50: 执行失败, 55: 上传文件失败)',
     file_name        varchar(64)         default '' not null comment '文件名',
-    temp_file_path   varchar(255)        default '' not null comment '临时文件路径',
+    local_file_path   varchar(255)       default '' not null comment '临时文件路径',
     upload_file_path varchar(255)        default '' not null comment '上传文件路径',
     exec_time        bigint unsigned     default 0  not null comment '执行时间(秒)',
     complete_time    bigint unsigned     default 0  not null comment '完成时间(秒)',
