@@ -14,7 +14,7 @@
 
 - 确认配置文件是否需要修改(默认配置)
 
-    ```json
+    ```text
     report:
         export:
         # 默认分页大小(用于分页查询业务数据)
@@ -34,7 +34,7 @@
 
   POST http://localhost:8080/report/export
 
-    ```json
+    ```text
     {
         # 操作用户ID(用于列表显示时过滤筛选) 非必填
         "userId": 1,
@@ -60,7 +60,7 @@
 
   调用`BasicExportTemplate.assemblyDynamicHead`方法实现动态表头初始化, 其中动态字段需使用[DynamicColumn](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/export/bo/DynamicColumn.java)类当做属性字段.
 
-    ```json
+    ```java
     /**
      * 组装固定表头并返回导出模型对象
      *
@@ -83,7 +83,7 @@
 
   调用`BasicExportTemplate.assemblyBody`方法实现表体初始化
 
-    ```json
+    ```java
     
     /**
      * 组装导出表体并返回导出模型对象
@@ -118,7 +118,7 @@
 
 GET http://localhost:8080/report/list?userId=1&businessType=1&pageNum=1&pageSize=10
 
-```json
+```text
 {
     # 操作用户ID(用于列表显示时过滤筛选) 非必填
     "userId": 1,
