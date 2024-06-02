@@ -1,7 +1,10 @@
 package com.github.youz.report.enums;
 
+import com.github.youz.report.constant.ReportConst;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 /**
  * 执行类型
@@ -28,5 +31,18 @@ public enum ExecutionType {
 
     public static boolean isSync(int code) {
         return SYNC.getCode() == code;
+    }
+
+    /**
+     * 根据编码获取对应的描述信息
+     *
+     * @param code 编码
+     * @return 描述信息
+     */
+    public static String getMessageByCode(int code) {
+        return Arrays.stream(values())
+                .filter(e -> e.getCode() == code)
+                .map(ExecutionType::getMessage).findAny()
+                .orElse(ReportConst.EMPTY);
     }
 }

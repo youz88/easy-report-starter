@@ -9,10 +9,8 @@ import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.DateFormatType;
 import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.export.bo.*;
-import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.ApplicationContextUtil;
 import com.github.youz.report.util.ExcelExportUtil;
-import com.github.youz.report.util.JsonUtil;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
@@ -49,7 +47,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      * @param context 任务上下文
      * @return 任务返回DTO
      */
-    protected abstract ExportData handleData(ExportContext context);
+    protected abstract ExportData handleBody(ExportContext context);
 
     @Override
     public PreExportResult preExport(String queryParam) {
@@ -81,14 +79,12 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     @Override
-    public AsyncExportResult asyncExport(ReportTask reportTask) {
-        // 获取任务上下文
-        ExportContext context = JsonUtil.toObject(reportTask.getContext(), ExportContext.class);
-
+    public AsyncExportResult asyncExport(ExportContext context) {
         // 获取表头
         ExportHead exportHead = handleHead(context);
 
-        return writeData(reportTask, context, exportHead);
+        // 生成报表文件
+        return writeData(context, exportHead);
     }
 
     /**
@@ -123,48 +119,46 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     /**
      * 生成报表文件
      *
-     * @param reportTask 报表任务
      * @param context    任务上下文
      * @param exportHead 表头
      * @return 临时文件地址
      */
-    private AsyncExportResult writeData(ReportTask reportTask, ExportContext context, ExportHead exportHead) {
-        // 构建临时文件路径
-        String tempFilePath = buildTempFilePath(context.getPreExportResult().getDirectoryName(), reportTask.getFileName());
+    private AsyncExportResult writeData(ExportContext context, ExportHead exportHead) {
+        // 构建本地文件路径
+        String localFilePath = buildLocalFilePath(context.getDirectoryName(), context.getFileName());
 
         // 创建ExcelWriter对象(try-with-resources)
-        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(tempFilePath)) {
+        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(localFilePath)) {
             // 创建sheet对象
             WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName(context));
 
             // 追加主体数据
-            appendMainData(writer, sheet, context, reportTask);
+            appendMainData(writer, sheet, context);
 
             // 追加尾部数据
             appendEndData(writer, sheet, context);
         }
         return new AsyncExportResult()
-                .setTempFilePath(tempFilePath);
+                .setLocalFilePath(localFilePath);
     }
 
     /**
      * 将主数据追加到ExcelWriter中
      *
-     * @param writer     ExcelWriter对象，用于写入数据
-     * @param sheet      WriteSheet对象，表示Excel中的一个Sheet页
-     * @param context    ExportContext对象，包含导出所需的上下文信息
-     * @param reportTask ReportTask对象，包含当前导出任务的信息
+     * @param writer  ExcelWriter对象，用于写入数据
+     * @param sheet   WriteSheet对象，表示Excel中的一个Sheet页
+     * @param context ExportContext对象，包含导出所需的上下文信息
      */
-    private void appendMainData(ExcelWriter writer, WriteSheet sheet, ExportContext context, ReportTask reportTask) {
+    private void appendMainData(ExcelWriter writer, WriteSheet sheet, ExportContext context) {
         // 获取导出配置信息
         ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
 
         // 初始化开始、结束、分页大小、当前页码
-        int start = (reportTask.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
+        int start = (context.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
         int end = start + exportProperties.getSlicesTaskMaxSize();
         int pageSize = getPageSize(exportProperties);
         int pageNum = start / pageSize + 1;
-        Long total = context.getPreExportResult().getTotal();
+        Long total = context.getTotal();
 
         // 分页查询追加表体数据
         ExportData exportData;
@@ -175,7 +169,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
                     .setPageSize(pageSize);
 
             // 查询导出数据
-            exportData = handleData(context);
+            exportData = handleBody(context);
 
             // 导出数据为空，跳过
             if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
@@ -203,7 +197,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
         ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
         int pageNum = ReportConst.ONE;
         int pageSize = getPageSize(exportProperties);
-        long total = context.getPreExportResult().getTotal();
+        long total = context.getTotal();
 
         // 分页查询追加表体数据
         for (int i = ReportConst.ZER0; i <= total; i += pageSize) {
@@ -213,7 +207,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
                     .setPageSize(pageSize);
 
             // 查询导出数据
-            ExportData exportData = handleData(context);
+            ExportData exportData = handleBody(context);
 
             // 导出数据为空，跳过
             if (exportData == null || CollectionUtils.isEmpty(exportData.getDataList())) {
@@ -245,14 +239,14 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     /**
-     * 构建临时文件路径[/root/export/businessTypeName/directoryName/fileName.xlsx]
+     * 构建本地文件路径[/root/export/businessTypeName/directoryName/fileName.xlsx]
      *
-     * @param directoryName 临时文件目录
-     * @param fileName      临时文件名称
+     * @param directoryName 本地文件目录
+     * @param fileName      本地文件名称
      * @return 临时文件路径
      */
-    private String buildTempFilePath(String directoryName, String fileName) {
-        return String.join(File.separator, ReportConst.EXPORT_ROOT_DIRECTORY,
+    private String buildLocalFilePath(String directoryName, String fileName) {
+        return String.join(File.separator, ReportConst.EXPORT_ROOT_PATH,
                 businessType().name().toLowerCase(), directoryName, fileName)
                 + ExcelTypeEnum.XLSX.getValue();
     }

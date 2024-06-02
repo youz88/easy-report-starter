@@ -23,7 +23,7 @@ public class ExportData {
      * @param abstractExport 抽象导出业务对象
      * @return 组装后的导出数据对象
      */
-    public static ExportData assemblyData(AbstractExportModel abstractExport) {
+    public static ExportData assemblyData(BasicExportTemplate abstractExport) {
         return new ExportData()
                 .setDataList(abstractExport.getDataList());
     }

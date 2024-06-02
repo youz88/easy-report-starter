@@ -1,28 +1,22 @@
 package com.github.youz.report.enums;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 /**
  * 业务类型
  */
-@Getter
-@RequiredArgsConstructor
-public enum BusinessType {
-
-    ORDER(1, "订单"),
-
-    GOODS(2, "商品"),
-
-    ;
+public interface BusinessType {
 
     /**
      * 业务编码
      */
-    private final int code;
+    int getCode();
 
     /**
      * 描述
      */
-    private final String message;
+    String getMessage();
+
+    /**
+     * 枚举名称
+     */
+    String name();
 }

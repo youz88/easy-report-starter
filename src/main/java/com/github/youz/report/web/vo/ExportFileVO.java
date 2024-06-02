@@ -19,7 +19,7 @@ public class ExportFileVO {
     /**
      * 将ReportTask对象转换为ExportFileVO对象
      *
-     * @param reportTask 报告任务对象
+     * @param reportTask 报表任务对象
      * @return 转换后的ExportFileVO对象
      */
     public static ExportFileVO assemblyData(ReportTask reportTask) {

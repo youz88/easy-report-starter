@@ -1,5 +1,6 @@
 package com.github.youz.report.export.bo;
 
+import com.github.youz.report.util.JsonUtil;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,11 +26,31 @@ public class ExportContext {
     private List<String> fieldNames;
 
     /**
-     * 预导出结果
+     * 总数
      */
-    private PreExportResult preExportResult;
+    private Long total;
 
-    // 仅作数据传输, 不可序列化
+    /**
+     * 执行类型
+     */
+    private Integer execType;
+
+    /**
+     * 分片索引(数据量大而分割为子任务时索引)
+     */
+    private Integer slicedIndex;
+
+    /**
+     * 目录名
+     */
+    private String directoryName;
+
+    /**
+     * 文件名
+     */
+    private String fileName;
+
+    // 仅作数据传输, 不可序列化存储
     /**
      * 分页大小
      */
@@ -58,9 +79,8 @@ public class ExportContext {
      * @return 构建的导出上下文对象
      */
     public static ExportContext build(PreExportResult preExportResult, ExportFileDTO reqDTO) {
-        return new ExportContext()
+        return JsonUtil.convert(preExportResult, ExportContext.class)
                 .setQueryParam(reqDTO.getQueryParam())
-                .setFieldNames(reqDTO.getFieldNames())
-                .setPreExportResult(preExportResult);
+                .setFieldNames(reqDTO.getFieldNames());
     }
 }

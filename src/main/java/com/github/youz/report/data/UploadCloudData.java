@@ -5,8 +5,8 @@ public interface UploadCloudData {
     /**
      * 上传文件
      *
-     * @param tempFilePath 临时文件路径
+     * @param localFilePath 本地文件路径
      * @return 上传文件路径
      */
-    String uploadFile(String tempFilePath);
+    String uploadFile(String localFilePath);
 }

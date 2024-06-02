@@ -44,8 +44,8 @@ public class ReportTask implements Serializable {
     /** 文件名 --> file_name */
     private String fileName;
 
-    /** 临时文件路径 --> temp_file_path */
-    private String tempFilePath;
+    /** 本地文件路径 --> local_file_path */
+    private String localFilePath;
 
     /** 上传文件路径 --> upload_file_path */
     private String uploadFilePath;

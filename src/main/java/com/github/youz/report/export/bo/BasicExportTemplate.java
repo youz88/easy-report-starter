@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.github.youz.report.converter.ReportConverterLoader;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -11,11 +12,12 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * 导出抽象类
+ * 基础导出模版
  */
+@Log4j2
 @Data
 @Accessors(chain = true)
-public abstract class AbstractExportModel {
+public class BasicExportTemplate {
 
     /**
      * 表头
@@ -33,33 +35,61 @@ public abstract class AbstractExportModel {
     private List<Field> fieldList;
 
     /**
-     * 组装表头和表体
+     * 组装固定表头并返回导出模型对象
      *
-     * @param clazz      模板类类型
-     * @param fieldNames 导出字段名称和顺序
-     * @return 当前对象
+     * @param tplClass 导出模板类对象
+     * @param context  导出上下文对象
+     * @return 组装好的导出模型对象
      */
-    public AbstractExportModel filterHead(Class<?> clazz, List<String> fieldNames) {
-        return filterHead(clazz, fieldNames, null);
+    public static BasicExportTemplate assemblyFixHead(Class<?> tplClass, ExportContext context) {
+        // 过滤需要导出的字段
+        return new BasicExportTemplate()
+                .filterHead(tplClass, context.getFieldNames(), null);
     }
 
     /**
-     * 组装表头数据
+     * 组装动态表头并返回导出模型对象
+     *
+     * @param tplInstance 模板实例对象
+     * @param context     导出上下文对象
+     * @return 组装好的导出模型对象
+     */
+    public static BasicExportTemplate assemblyDynamicHead(Object tplInstance, ExportContext context) {
+        // 过滤需要导出的字段 & 组装动态表头
+        return new BasicExportTemplate()
+                .filterHead(tplInstance.getClass(), context.getFieldNames(), tplInstance);
+    }
+
+    /**
+     * 组装导出表体并返回导出模型对象
+     *
+     * @param tplDataList 模板数据列表
+     * @param context     导出上下文对象
+     * @return 组装好的导出模型对象
+     */
+    public static BasicExportTemplate assemblyBody(List<?> tplDataList, ExportContext context) {
+        // 过滤需要导出的字段
+        return new BasicExportTemplate()
+                .filterData(tplDataList, context.getFieldList());
+    }
+
+    /**
+     * 过滤表头数据
      *
      * @param clazz          模板类类型
      * @param fieldNames     导出字段名称和顺序
      * @param exportTemplate 导出模版对象(含有动态列时需传入)
      * @return 当前对象
      */
-    public AbstractExportModel filterHead(Class<?> clazz, List<String> fieldNames, Object exportTemplate) {
-        // 初始化表头、字段属性
-        headList = new ArrayList<>(fieldNames.size());
-        fieldList = new ArrayList<>(fieldNames.size());
-
+    private BasicExportTemplate filterHead(Class<?> clazz, List<String> fieldNames, Object exportTemplate) {
         // 如果为空，则使用默认字段名称列表
         if (CollectionUtils.isEmpty(fieldNames)) {
             fieldNames = crateDefaultFieldNames(clazz);
         }
+
+        // 初始化表头、字段属性
+        headList = new ArrayList<>(fieldNames.size());
+        fieldList = new ArrayList<>(fieldNames.size());
 
         // 获取导出字段映射
         Map<String, Field> fieldMap = getExportFields(clazz);
@@ -81,13 +111,13 @@ public abstract class AbstractExportModel {
     }
 
     /**
-     * 组装表头和表体
+     * 过滤表体数据
      *
      * @param tplDataList     模版数据列表
      * @param filterFieldList 过滤属性
      * @return 当前对象
      */
-    public AbstractExportModel filterData(List<?> tplDataList, List<Field> filterFieldList) {
+    private BasicExportTemplate filterData(List<?> tplDataList, List<Field> filterFieldList) {
         if (CollectionUtils.isEmpty(tplDataList)) {
             return this;
         }
@@ -104,10 +134,9 @@ public abstract class AbstractExportModel {
             filterData.add(rowData);
         });
 
-        this.dataList = filterData;
+        dataList = filterData;
         return this;
     }
-
 
     /**
      * 追加表头数据

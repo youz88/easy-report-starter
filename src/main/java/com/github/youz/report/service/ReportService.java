@@ -31,14 +31,14 @@ public interface ReportService {
      * 根据文件ID获取文件信息
      *
      * @param id 文件ID
-     * @return 报告信息VO
+     * @return 报表信息VO
      */
     ReportInfoVO fileInfo(Long id);
 
     /**
      * 获取文件列表分页信息
      *
-     * @param reqDTO 报告列表请求DTO
+     * @param reqDTO 报表列表请求DTO
      * @return 分页文件VO
      */
     PageVO<ReportInfoVO> fileList(ReportListDTO reqDTO);

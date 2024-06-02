@@ -1,7 +1,10 @@
 package com.github.youz.report.enums;
 
+import com.github.youz.report.constant.ReportConst;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 /**
  * 报表状态
@@ -34,4 +37,17 @@ public enum ReportStatus {
      * 描述
      */
     private final String message;
+
+    /**
+     * 根据编码获取对应的描述信息
+     *
+     * @param code 编码
+     * @return 描述信息
+     */
+    public static String getMessageByCode(int code) {
+        return Arrays.stream(values())
+                .filter(e -> e.getCode() == code)
+                .map(ReportStatus::getMessage).findAny()
+                .orElse(ReportConst.EMPTY);
+    }
 }

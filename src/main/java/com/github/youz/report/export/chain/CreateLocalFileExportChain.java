@@ -5,9 +5,11 @@ import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.export.bo.AsyncExportResult;
+import com.github.youz.report.export.bo.ExportContext;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
 import com.github.youz.report.model.ReportTask;
+import com.github.youz.report.util.JsonUtil;
 import com.github.youz.report.util.ZipUtil;
 import com.mybatisflex.core.util.StringUtil;
 import com.mybatisflex.core.util.UpdateEntity;
@@ -60,17 +62,18 @@ public class CreateLocalFileExportChain extends AbstractExportChain {
         ExportBusinessHandler handler = compositeExportHandler.getHandler(reportTask.getBusinessType());
 
         // 定时任务执行导出
-        AsyncExportResult exportResult = handler.asyncExport(reportTask);
-        String tempFilePath = exportResult.getTempFilePath();
+        ExportContext exportContext = JsonUtil.toObject(reportTask.getContext(), ExportContext.class);
+        AsyncExportResult exportResult = handler.asyncExport(exportContext);
+        String localFilePath = exportResult.getLocalFilePath();
 
-        // 主任务需将临时文件压缩
+        // 主任务需将本地文件压缩
         if (reportTask.getPid() == ReportConst.ZER0) {
-            tempFilePath = ZipUtil.zipFiles(Collections.singletonList(tempFilePath), reportTask.getFileName());
+            localFilePath = ZipUtil.zipFiles(Collections.singletonList(localFilePath), reportTask.getFileName());
         }
 
-        // 更新任务的状态为生成本地文件成功 & 临时文件路径
+        // 更新任务的状态为生成本地文件成功 & 本地文件路径
         ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())
-                .setTempFilePath(tempFilePath)
+                .setLocalFilePath(localFilePath)
                 .setStatus(ReportStatus.LOCAL_FILE_SUCCESS.getCode());
         reportTaskData.updateById(update);
     }
@@ -86,16 +89,16 @@ public class CreateLocalFileExportChain extends AbstractExportChain {
 
         // 分片任务已全部执行成功
         if (reportTask.getSlicedIndex() == slicedList.size()) {
-            // 获取分片任务临时文件路径
-            List<String> filePaths = slicedList.stream().map(ReportTask::getTempFilePath).collect(Collectors.toList());
+            // 获取分片任务本地文件路径
+            List<String> filePaths = slicedList.stream().map(ReportTask::getLocalFilePath).collect(Collectors.toList());
 
             // zip压缩
-            String tempFilePath = ZipUtil.zipFiles(filePaths, reportTask.getFileName());
-            ExceptionCode.EXPORT_COMPRESSED_FAIL.assertTrue(StringUtil.isNotBlank(tempFilePath));
+            String localFilePath = ZipUtil.zipFiles(filePaths, reportTask.getFileName());
+            ExceptionCode.EXPORT_COMPRESSED_FAIL.assertTrue(StringUtil.isNotBlank(localFilePath));
 
-            // 更新任务的状态为生成本地文件成功 & 临时文件路径
+            // 更新任务的状态为生成本地文件成功 & 本地文件路径
             ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())
-                    .setTempFilePath(tempFilePath)
+                    .setLocalFilePath(localFilePath)
                     .setStatus(ReportStatus.LOCAL_FILE_SUCCESS.getCode());
             reportTaskData.updateById(update);
         } else {

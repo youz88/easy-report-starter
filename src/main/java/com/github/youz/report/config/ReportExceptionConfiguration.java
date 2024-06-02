@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * 全局异常处理配置类
  */
 @RestControllerAdvice
-public class ReportExceptionConfig {
+public class ReportExceptionConfiguration {
 
     /**
      * 异常处理器，处理ReportException异常

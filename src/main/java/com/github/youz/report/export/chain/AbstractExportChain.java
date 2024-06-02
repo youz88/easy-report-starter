@@ -67,7 +67,7 @@ public abstract class AbstractExportChain implements ExportChain {
     /**
      * 判断是否为已拆分的父任务
      *
-     * @param reportTask 报告任务对象
+     * @param reportTask 报表任务对象
      * @return 若为已拆分的主任务则返回true，否则返回false
      */
     public boolean isSlicedParentTask(ReportTask reportTask) {

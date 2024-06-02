@@ -60,7 +60,7 @@ public class ReportTaskDataImpl implements ReportTaskData {
                 .set(ReportTask::getErrorMsg, reportTask.getErrorMsg(), StringUtil.isNotBlank(reportTask.getErrorMsg()))
                 .set(ReportTask::getExecTime, reportTask.getExecTime(), Objects.nonNull(reportTask.getExecTime()))
                 .set(ReportTask::getCompleteTime, reportTask.getCompleteTime(), Objects.nonNull(reportTask.getCompleteTime()))
-                .set(ReportTask::getTempFilePath, reportTask.getTempFilePath(), StringUtil.isNotBlank(reportTask.getTempFilePath()))
+                .set(ReportTask::getLocalFilePath, reportTask.getLocalFilePath(), StringUtil.isNotBlank(reportTask.getLocalFilePath()))
                 .where(ReportTask::getId).eq(reportTask.getId())
                 .update();
     }
@@ -79,7 +79,7 @@ public class ReportTaskDataImpl implements ReportTaskData {
     public List<ReportTask> selectSlicedByStatus(Long pid, Integer status) {
         ReportTaskTableDef def = ReportTaskTableDef.REPORT_TASK;
         QueryWrapper query = QueryWrapper.create()
-                .select(def.ID, def.TEMP_FILE_PATH)
+                .select(def.ID, def.LOCAL_FILE_PATH)
                 .and(def.PID.eq(pid))
                 .and(def.STATUS.eq(status));
         return reportTaskMapper.selectListByQuery(query);

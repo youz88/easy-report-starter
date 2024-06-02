@@ -32,9 +32,9 @@ public interface ReportTaskData {
     void insert(ReportTask reportTask);
 
     /**
-     * 批量插入报告任务
+     * 批量插入报表任务
      *
-     * @param reportTaskList 报告任务列表
+     * @param reportTaskList 报表任务列表
      */
     void batchInsert(List<ReportTask> reportTaskList);
 

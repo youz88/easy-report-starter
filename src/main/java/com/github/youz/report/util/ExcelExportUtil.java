@@ -88,12 +88,12 @@ public class ExcelExportUtil {
     /**
      * 创建ExcelWriter对象
      *
-     * @param tempFilePath 临时文件路径
+     * @param localFilePath 本地文件路径
      * @return ExcelWriter
      */
-    public static ExcelWriter createExcelWriter(String tempFilePath) {
-        File tempFile = new File(tempFilePath);
-        File tempDirectory = tempFile.getParentFile();
+    public static ExcelWriter createExcelWriter(String localFilePath) {
+        File localFile = new File(localFilePath);
+        File tempDirectory = localFile.getParentFile();
 
         // 如果父目录不存在，则创建父目录
         if (!tempDirectory.exists()) {
@@ -102,7 +102,7 @@ public class ExcelExportUtil {
         }
 
         // 创建ExcelWriter对象并返回
-        return EasyExcel.write(tempFile).build();
+        return EasyExcel.write(localFile).build();
     }
 
     /**

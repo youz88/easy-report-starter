@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Log4j2
 @Configuration
 @ConditionalOnProperty(prefix = "spring.profiles", name = "active", havingValue = "dev")
-public class MybatisConfig {
+public class MybatisConfiguration {
 
-    public MybatisConfig() {
+    public MybatisConfiguration() {
         //开启审计功能
         AuditManager.setAuditEnable(true);
 

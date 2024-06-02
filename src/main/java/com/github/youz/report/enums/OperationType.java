@@ -1,7 +1,10 @@
 package com.github.youz.report.enums;
 
+import com.github.youz.report.constant.ReportConst;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 /**
  * 操作类型
@@ -17,7 +20,7 @@ public enum OperationType {
     ;
 
     /**
-     * 业务编码
+     * 编码
      */
     private final int code;
 
@@ -25,4 +28,18 @@ public enum OperationType {
      * 描述
      */
     private final String message;
+
+    /**
+     * 根据编码获取对应的描述信息
+     *
+     * @param code 编码
+     * @return 描述信息
+     */
+    public static String getMessageByCode(int code) {
+        return Arrays.stream(values())
+                .filter(e -> e.getCode() == code)
+                .map(OperationType::getMessage).findAny()
+                .orElse(ReportConst.EMPTY);
+    }
+
 }

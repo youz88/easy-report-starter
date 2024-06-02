@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 public class AsyncExportResult {
 
     /**
-     * 临时文件路径
+     * 本地文件路径
      */
-    String tempFilePath;
+    String localFilePath;
 }
