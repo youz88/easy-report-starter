@@ -55,6 +55,9 @@ public class BasicExportTemplate {
      * @return 组装好的导出模型对象
      */
     public static BasicExportTemplate assemblyDynamicHead(Object tplInstance, ExportContext context) {
+        // 记录动态表头模版
+        context.setDynamicTemplate(tplInstance);
+
         // 过滤需要导出的字段 & 组装动态表头
         return new BasicExportTemplate()
                 .filterHead(tplInstance.getClass(), context.getFieldNames(), tplInstance);
@@ -70,7 +73,7 @@ public class BasicExportTemplate {
     public static BasicExportTemplate assemblyBody(List<?> tplDataList, ExportContext context) {
         // 过滤需要导出的字段
         return new BasicExportTemplate()
-                .filterData(tplDataList, context.getFieldList());
+                .filterBody(tplDataList, context.getFieldList());
     }
 
     /**
@@ -117,7 +120,7 @@ public class BasicExportTemplate {
      * @param filterFieldList 过滤属性
      * @return 当前对象
      */
-    private BasicExportTemplate filterData(List<?> tplDataList, List<Field> filterFieldList) {
+    private BasicExportTemplate filterBody(List<?> tplDataList, List<Field> filterFieldList) {
         if (CollectionUtils.isEmpty(tplDataList)) {
             return this;
         }
@@ -156,7 +159,7 @@ public class BasicExportTemplate {
             //noinspection unchecked
             List<DynamicColumn> items = (List<DynamicColumn>) obj;
             for (DynamicColumn item : items) {
-                filterHead.add(Arrays.asList(item.getHead()));
+                filterHead.add(new ArrayList<>(Arrays.asList(item.getHead())));
             }
         } else if (field.getType().isAssignableFrom(DynamicColumn.class)) {
             // 动态单表头
@@ -166,10 +169,10 @@ public class BasicExportTemplate {
             }
 
             DynamicColumn item = (DynamicColumn) obj;
-            filterHead.add(Arrays.asList(item.getHead()));
+            filterHead.add(new ArrayList<>(Arrays.asList(item.getHead())));
         } else {
             // 普通对象
-            filterHead.add(Arrays.asList(field.getAnnotation(ExcelProperty.class).value()));
+            filterHead.add(new ArrayList<>(Arrays.asList(field.getAnnotation(ExcelProperty.class).value())));
         }
     }
 

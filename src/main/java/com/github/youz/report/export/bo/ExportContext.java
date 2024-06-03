@@ -72,6 +72,11 @@ public class ExportContext {
     private transient List<Field> fieldList;
 
     /**
+     * 动态表头模版
+     */
+    private transient Object dynamicTemplate;
+
+    /**
      * 构建导出上下文对象
      *
      * @param preExportResult 预处理导出结果对象

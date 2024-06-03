@@ -3,14 +3,17 @@ package com.github.youz.report.export.bo;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Objects;
-
 /**
  * 动态列
  */
 @Data
 @Accessors(chain = true)
 public class DynamicColumn {
+
+    /**
+     * 唯一标识
+     */
+    private Object uniqueKey;
 
     /**
      * 表头
@@ -22,29 +25,28 @@ public class DynamicColumn {
      */
     private Object data;
 
-    public String[] getHead() {
-        return Objects.isNull(head) ? null : head.clone();
-    }
-
-    public void setHead(String[] head) {
-        this.head = Objects.isNull(head) ? null : head.clone();
+    /**
+     * 构建动态模板表头
+     *
+     * @param uniqueKey 唯一标识, 用于处理表体数据时匹配表头
+     * @param head      表头
+     * @return 模板子项
+     */
+    public static DynamicColumn buildHead(Object uniqueKey, String... head) {
+        return new DynamicColumn()
+                .setHead(head)
+                .setUniqueKey(uniqueKey);
     }
 
     /**
-     * 组装导出模板子项
+     * 构建动态模板表体
      *
-     * @param isRenderHead 是否渲染表头
-     * @param data         表体
-     * @param head         表头
+     * @param data 表体
      * @return 模板子项
      */
-    public static DynamicColumn init(Boolean isRenderHead, Object data, String... head) {
-        DynamicColumn item = new DynamicColumn()
+    public static DynamicColumn buildBody(Object data) {
+        return new DynamicColumn()
                 .setData(data);
-        if (isRenderHead) {
-            item.setHead(head);
-        }
-        return item;
     }
 
 }

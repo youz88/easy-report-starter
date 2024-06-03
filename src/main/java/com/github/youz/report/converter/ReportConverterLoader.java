@@ -46,10 +46,10 @@ public class ReportConverterLoader {
 
         // 添加转换器
         addExportConverter(new ExportDefaultConverter());
-        addExportConverter(new ExportDynamicConverter());
         addExportConverter(new ExportDateConverter());
         addExportConverter(new ExportMoneyConverter());
         addExportConverter(new ExportEnumConverter());
+        addExportConverter(new ExportDynamicConverter());
     }
 
     /**

@@ -13,12 +13,17 @@ public class ExportDynamicConverter implements ExportConverter {
 
     @Override
     public boolean supports(Field field, Object target) {
-        return field.getType().isAssignableFrom(List.class);
+        return field.getType().isAssignableFrom(List.class) || target instanceof DynamicColumn;
     }
 
     @Override
     public Object convert2Excel(Field field, Object target) {
-        List<DynamicColumn> items = (List<DynamicColumn>) target;
-        return items.stream().map(DynamicColumn::getData).collect(Collectors.toList());
+        if (target instanceof DynamicColumn) {
+            DynamicColumn dynamic = (DynamicColumn) target;
+            return dynamic.getData();
+        } else {
+            List<DynamicColumn> dynamicList = (List<DynamicColumn>) target;
+            return dynamicList.stream().map(DynamicColumn::getData).collect(Collectors.toList());
+        }
     }
 }
