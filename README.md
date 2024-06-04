@@ -96,7 +96,7 @@
     
     ```
 
-  示例可参考: [OrderTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/order/OrderTemplate.java)
+  示例可参考: [OrderTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/order/OrderTemplate.java), [GoodsTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/goods/GoodsTemplate.java)
 
   关于导出模版对象, 其中内置了部份自定义注解, 用于更方便的处理导出字段格式化.
 
