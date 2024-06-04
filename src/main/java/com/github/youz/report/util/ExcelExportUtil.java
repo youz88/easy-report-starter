@@ -5,7 +5,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ExecutionType;
-import com.github.youz.report.enums.ReportExportStep;
+import com.github.youz.report.enums.ExportStep;
 import com.github.youz.report.export.bo.ExportContext;
 import com.github.youz.report.export.bo.SyncExportResult;
 import com.github.youz.report.export.chain.ExportChain;
@@ -51,8 +51,8 @@ public class ExcelExportUtil {
      */
     public static void jobExport(ReportTask reportTask) {
         // 根据报表任务状态获取导出步骤
-        ReportExportStep reportExportStep = ReportExportStep.of(reportTask.getStatus());
-        Class<? extends ExportChain>[] chainClasses = reportExportStep.getChainClasses();
+        ExportStep exportStep = ExportStep.of(reportTask.getStatus());
+        Class<? extends ExportChain>[] chainClasses = exportStep.getChainClasses();
         if (ArrayUtil.isEmpty(chainClasses)) {
             return;
         }

@@ -7,9 +7,15 @@ public class ReportConst {
 
     public static final int ZER0 = 0;
 
+    public static final long ZER0_L = 0L;
+
     public static final int ONE = 1;
 
     public static final String MINUS_SYMBOL = "-";
+
+    public static final String COMMA_SYMBOL = ",";
+
+    public static final String FULL_STOP_SYMBOL = ".";
 
     public static final String UNDER_LINE_SYMBOL = "_";
 

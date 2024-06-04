@@ -62,6 +62,32 @@ public enum ExceptionCode {
     EXPORT_COMPRESSED_FAIL(10008),
 
     // 20000-29999 导入错误
+
+    /**
+     * 导入模版类下标重复
+     */
+    IMPORT_INDEX_REPEATED_FAIL(20001),
+
+    /**
+     * 导入数量超过最大限制
+     */
+    IMPORT_LIMIT_ROW_FAIL(20002),
+
+    /**
+     * 表头与模版不一致
+     */
+    IMPORT_HEAD_DIFF_TEMPLATE_FAIL(20003),
+
+    /**
+     * 导入失败，自定义错误信息
+     */
+    IMPORT_FAIL_CUSTOM_MSG(20004),
+
+    /**
+     * 导入属性格式错误
+     */
+    IMPORT_FIELD_FORMAT_FAIL(20005),
+
     ;
 
     /**
@@ -121,11 +147,12 @@ public enum ExceptionCode {
      * 校验传入的boolean值是否为true。
      *
      * @param flag 需要校验的boolean值
+     * @param args 附加参数
      * @throws ReportException 如果flag不为true，则抛出异常
      */
-    public void assertTrue(boolean flag) {
+    public void assertIsTrue(boolean flag, Object... args) {
         if (!flag) {
-            throw new ReportException(this, errorMessage());
+            throw new ReportException(this, errorMessage(args));
         }
     }
 
@@ -134,8 +161,8 @@ public enum ExceptionCode {
      *
      * @throws ReportException 抛出自定义异常，包含当前对象和错误信息
      */
-    public void throwException() {
-        throw new ReportException(this, errorMessage());
+    public void throwException(Object... args) {
+        throw new ReportException(this, errorMessage(args));
     }
 
     /**
@@ -143,9 +170,9 @@ public enum ExceptionCode {
      *
      * @return 错误信息
      */
-    private String errorMessage() {
+    private String errorMessage(Object... args) {
         return ApplicationContextUtil.getBean(MessageSource.class)
-                .getMessage(String.valueOf(code), null, Locale.getDefault());
+                .getMessage(String.valueOf(code), args, Locale.getDefault());
     }
 
 }

@@ -9,7 +9,7 @@ import java.util.Arrays;
  * 报表导出步骤
  */
 @Getter
-public enum ReportExportStep {
+public enum ExportStep {
 
     WAIT(ReportStatus.WAIT.getCode(), "待执行",
             ExecExportChain.class, CreateLocalFileExportChain.class, UploadCloudFileExportChain.class, CompletedExportChain.class),
@@ -46,7 +46,7 @@ public enum ReportExportStep {
     private final Class<? extends ExportChain>[] chainClasses;
 
     @SafeVarargs
-    ReportExportStep(int code, String message, Class<? extends ExportChain>... chainClasses) {
+    ExportStep(int code, String message, Class<? extends ExportChain>... chainClasses) {
         this.code = code;
         this.message = message;
         this.chainClasses = chainClasses;
@@ -58,13 +58,12 @@ public enum ReportExportStep {
      * @param code 报表导出步骤的编码
      * @return 报表导出步骤的枚举值
      */
-    public static ReportExportStep of(int code) {
-        ReportExportStep reportExportStep = Arrays.stream(values())
+    public static ExportStep of(int code) {
+        ExportStep exportStep = Arrays.stream(values())
                 .filter(step -> step.code == code).findFirst()
                 .orElse(null);
-        if (reportExportStep == null) {
-            ExceptionCode.EXPORT_NO_MATCH_CHAIN.throwException();
-        }
-        return reportExportStep;
+
+        ExceptionCode.EXPORT_NO_MATCH_CHAIN.assertIsTrue(exportStep != null);
+        return exportStep;
     }
 }

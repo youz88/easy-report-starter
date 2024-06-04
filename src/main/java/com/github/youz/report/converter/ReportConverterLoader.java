@@ -4,6 +4,7 @@ import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.converters.ConverterKeyBuild;
 import com.alibaba.excel.converters.ConverterKeyBuild.ConverterKey;
 import com.github.youz.report.converter.export.*;
+import com.github.youz.report.converter.imports.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,6 +37,12 @@ public class ReportConverterLoader {
      */
     private static void initImportConverter() {
         importConverter = new HashMap<>(16);
+
+        // 添加转换器
+        putImportConverter(new BigDecimalConverter());
+        putImportConverter(new TimestampConverter());
+        putImportConverter(new PhoneNumberConverter());
+        putImportConverter(new EnumConverter());
     }
 
     /**
@@ -57,7 +64,7 @@ public class ReportConverterLoader {
      *
      * @param converter 导入转换器
      */
-    private static void putImportConverter(Converter<?> converter) {
+    public static void putImportConverter(Converter<?> converter) {
         importConverter.put(ConverterKeyBuild.buildKey(converter.getClass()), converter);
     }
 
@@ -66,7 +73,7 @@ public class ReportConverterLoader {
      *
      * @param converter 导出转换器
      */
-    private static void addExportConverter(ExportConverter converter) {
+    public static void addExportConverter(ExportConverter converter) {
         exportConverter.add(converter);
     }
 
