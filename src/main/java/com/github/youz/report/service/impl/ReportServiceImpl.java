@@ -146,7 +146,7 @@ public class ReportServiceImpl implements ReportService {
      * @return 导入文件的VO对象
      */
     private ImportFileVO importFile(ImportFileDTO reqDTO, String localFilePath, String fileName) {
-        ExceptionCode.DOWNLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
+        ExceptionCode.IMPORT_DOWNLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
 
         // 初始化报表任务
         ReportTask reportTask = JsonUtil.convert(reqDTO, ReportTask.class)

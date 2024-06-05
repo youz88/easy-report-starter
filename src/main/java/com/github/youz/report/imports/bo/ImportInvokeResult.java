@@ -1,5 +1,6 @@
 package com.github.youz.report.imports.bo;
 
+import com.github.youz.report.enums.MessageCode;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -78,7 +79,7 @@ public class ImportInvokeResult {
                 new DataStatus()
                         .setIndex(dto.getIndex())
                         .setSuccess(Boolean.FALSE)
-                        .setReason("网络异常")
+                        .setReason(MessageCode.IMPORT_NETWORK_ANOMALY.localMessage())
         ).collect(Collectors.toList());
     }
 }

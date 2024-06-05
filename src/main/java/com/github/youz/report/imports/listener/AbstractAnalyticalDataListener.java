@@ -11,6 +11,7 @@ import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.alibaba.excel.read.metadata.ReadSheet;
+import com.alibaba.excel.read.metadata.holder.ReadSheetHolder;
 import com.github.youz.report.annotation.ExcelCell;
 import com.github.youz.report.config.ImportProperties;
 import com.github.youz.report.constant.ReportConst;
@@ -79,9 +80,14 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     private Map<Integer, Field> targetFieldMap;
 
     /**
-     * 父级表头
+     * 表头
      */
     private Map<Integer, List<String>> headMap;
+
+    /**
+     * 工作表名称
+     */
+    private String sheetName;
 
     /**
      * 本地文件路径
@@ -107,18 +113,11 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         this.targetClass = targetClass;
         this.data = new ArrayList<>();
         this.sourceData = new LinkedHashMap<>();
-        this.checkFailRows = new LinkedList<>();
+        this.checkFailRows = new ArrayList<>();
 
         // 初始化目标类属性
         this.targetFieldMap = assemblyTargetFieldMap(targetClass);
     }
-
-    /**
-     * 获取导入失败模板地址
-     *
-     * @return 导入失败模板地址
-     */
-    protected abstract String getFailTemplatePath();
 
     /**
      * 调用业务方参数校验方法
@@ -155,20 +154,17 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
             return;
         }
 
-        // 判断报表行数是否超出限制
-        Integer limitMaxRow = getLimitMaxRow();
-        Integer approximateTotalRowNumber = context.readSheetHolder().getApproximateTotalRowNumber();
-        ExceptionCode.IMPORT_LIMIT_ROW_FAIL.assertIsTrue(approximateTotalRowNumber <= limitMaxRow, limitMaxRow);
-
-        // 初始化表头
-        this.headMap = StreamUtil.toMap(headMap.entrySet(), Map.Entry::getKey, entry -> Collections.singletonList(entry.getValue()));
-
         // 表头校验
-        checkHead(headMap);
+        checkHead(headMap, context);
+
+        // 初始化表头 & 工作表名称
+        this.headMap = StreamUtil.toMap(headMap.entrySet(), Map.Entry::getKey, entry -> Collections.singletonList(entry.getValue()));
+        this.sheetName = context.readSheetHolder().getSheetName();
     }
 
     @Override
     public void invoke(Map<Integer, String> rowMap, AnalysisContext context) {
+        // 是否过滤该数据行
         if (filterRowData(rowMap, context)) {
             return;
         }
@@ -259,6 +255,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * @return 是否过滤
      */
     private Boolean filterRowData(Map<Integer, String> rowMap, AnalysisContext context) {
+        // 当前行号
         Integer rowIndex = context.readRowHolder().getRowIndex();
 
         // 判断当前行是否为表体起始行
@@ -373,7 +370,8 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     private void appendHead(Map<Integer, String> rowMap) {
         rowMap.forEach((k, v) -> {
             List<String> headNames = headMap.get(k);
-            // 去除重复表头
+
+            // 追加表头
             if (!headNames.contains(v)) {
                 headNames.add(v);
             }
@@ -459,14 +457,22 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * 表头校验
      *
      * @param headMap 表头
+     * @param context 分析上下文
      */
-    private void checkHead(Map<Integer, String> headMap) {
+    private void checkHead(Map<Integer, String> headMap, AnalysisContext context) {
+        // 判断报表行数是否超出限制
+        Integer limitMaxRow = getLimitMaxRow();
+        ReadSheetHolder readSheetHolder = context.readSheetHolder();
+        Integer approximateTotalRowNumber = readSheetHolder.getApproximateTotalRowNumber();
+        ExceptionCode.IMPORT_LIMIT_ROW_FAIL.assertIsTrue(approximateTotalRowNumber <= limitMaxRow, limitMaxRow);
+
+        // 校验表头
         for (Map.Entry<Integer, String> entry : headMap.entrySet()) {
             if (StringUtil.isBlank(entry.getValue())) {
                 continue;
             }
 
-            // 校验表头名称
+            // 校验表头与模版是否一致
             Field field = targetFieldMap.get(entry.getKey());
             String headName = field.getAnnotation(ExcelCell.class).value()[0];
             ExceptionCode.IMPORT_HEAD_DIFF_TEMPLATE_FAIL.assertIsTrue(entry.getValue().equals(headName));

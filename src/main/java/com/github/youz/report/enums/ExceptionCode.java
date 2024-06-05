@@ -20,74 +20,30 @@ import java.util.Map;
 @AllArgsConstructor
 public enum ExceptionCode {
 
-    // 0-9999 通用错误
-    /**
-     * 下载文件失败
-     */
-    DOWNLOAD_FAIL(9001),
+    // 10000-19999 通用错误
+    COMMON_UPLOAD_FAIL(10001, MessageCode.COMMON_UPLOAD_FAIL),
 
-    // 10000-19999 导出错误
-    /**
-     * 导出处理器不能为空
-     */
-    EXPORT_HANDLER_EMPTY(10001),
+    // 20000-29999 导出错误
+    EXPORT_NO_MATCH_BUSINESS_HANDLER(10001, MessageCode.EXPORT_NO_MATCH_BUSINESS_HANDLER),
 
-    /**
-     * 未找到业务匹配的导出处理器
-     */
-    EXPORT_NO_MATCH_BUSINESS_HANDLER(10002),
+    EXPORT_DATA_EMPTY(10002, MessageCode.EXPORT_DATA_EMPTY),
 
-    /**
-     * 导出数据为空
-     */
-    EXPORT_DATA_EMPTY(10003),
+    EXPORT_FILE_FAIL(10003, MessageCode.EXPORT_FILE_FAIL),
 
-    /**
-     * 未找到匹配的导出链路
-     */
-    EXPORT_NO_MATCH_CHAIN(10005),
-
-    /**
-     * 创建文件目录失败
-     */
-    EXPORT_MKDIR_FAIL(10006),
-
-    /**
-     * 文件上传云失败
-     */
-    EXPORT_UPLOAD_FAIL(10007),
-
-    /**
-     * 生成压缩文件失败
-     */
-    EXPORT_COMPRESSED_FAIL(10008),
+    EXPORT_COMPRESSED_FILE_FAIL(10008, MessageCode.EXPORT_COMPRESSED_FILE_FAIL),
 
     // 20000-29999 导入错误
+    IMPORT_INDEX_REPEATED_FAIL(20001, MessageCode.IMPORT_INDEX_REPEATED_FAIL),
 
-    /**
-     * 导入模版类下标重复
-     */
-    IMPORT_INDEX_REPEATED_FAIL(20001),
+    IMPORT_LIMIT_ROW_FAIL(20002, MessageCode.IMPORT_EXCEED_LIMIT_ROW),
 
-    /**
-     * 导入数量超过最大限制
-     */
-    IMPORT_LIMIT_ROW_FAIL(20002),
+    IMPORT_HEAD_DIFF_TEMPLATE_FAIL(20003, MessageCode.IMPORT_HEAD_DIFF_TEMPLATE),
 
-    /**
-     * 表头与模版不一致
-     */
-    IMPORT_HEAD_DIFF_TEMPLATE_FAIL(20003),
+    IMPORT_FAIL_CUSTOM_MSG(20004, MessageCode.IMPORT_FAIL_CUSTOM_MSG),
 
-    /**
-     * 导入失败，自定义错误信息
-     */
-    IMPORT_FAIL_CUSTOM_MSG(20004),
+    IMPORT_FIELD_FORMAT_FAIL(20005, MessageCode.IMPORT_FIELD_FORMAT_FAIL),
 
-    /**
-     * 导入属性格式错误
-     */
-    IMPORT_FIELD_FORMAT_FAIL(20005),
+    IMPORT_DOWNLOAD_FAIL(20006, MessageCode.IMPORT_DOWNLOAD_FAIL),
 
     ;
 
@@ -95,6 +51,11 @@ public enum ExceptionCode {
      * 错误码
      */
     private final int code;
+
+    /**
+     * 错误消息
+     */
+    private final MessageCode messageCode;
 
     /**
      * 判断一个对象是否为空，如果为空则抛出异常。
@@ -173,7 +134,7 @@ public enum ExceptionCode {
      */
     private String errorMessage(Object... args) {
         return ApplicationContextUtil.getBean(MessageSource.class)
-                .getMessage(String.valueOf(code), args, Locale.getDefault());
+                .getMessage(messageCode.getCode(), args, Locale.getDefault());
     }
 
 }

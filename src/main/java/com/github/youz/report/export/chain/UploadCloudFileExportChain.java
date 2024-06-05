@@ -35,7 +35,7 @@ public class UploadCloudFileExportChain extends AbstractExportChain {
 
         // 上传导出文件到云空间, 返回云存储文件路径
         String cloudFilePath = ApplicationContextUtil.getBean(UploadCloudData.class).uploadFile(reportTask.getLocalFilePath());
-        ExceptionCode.EXPORT_UPLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(cloudFilePath));
+        ExceptionCode.COMMON_UPLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(cloudFilePath));
 
         // 更新任务的上传文件路径
         ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())

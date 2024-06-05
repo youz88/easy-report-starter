@@ -78,7 +78,7 @@ public class ExcelExportUtil {
      * @return WriteSheet
      */
     public static WriteSheet createWriteSheet(List<List<String>> headList, String sheetName) {
-        return EasyExcel.writerSheet(sheetName)
+        return EasyExcel.writerSheet(0, sheetName)
                 .registerWriteHandler(ExcelStyleUtil.createExcelStyle())
                 .registerWriteHandler(ExcelStyleUtil.createAutoColumn())
                 .head(headList)
@@ -134,8 +134,8 @@ public class ExcelExportUtil {
                     .doWrite(syncExportResult.getDataList());
         } catch (Exception e) {
             // 如果出现异常，记录错误日志 & 抛出异常
-            log.error("下载文件失败", e);
-            ExceptionCode.DOWNLOAD_FAIL.throwException();
+            log.error("导出文件失败", e);
+            ExceptionCode.EXPORT_FILE_FAIL.throwException();
         }
     }
 

@@ -94,7 +94,7 @@ public class CreateLocalFileExportChain extends AbstractExportChain {
 
             // zip压缩
             String localFilePath = ZipUtil.zipFiles(filePaths, reportTask.getFileName());
-            ExceptionCode.EXPORT_COMPRESSED_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
+            ExceptionCode.EXPORT_COMPRESSED_FILE_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
 
             // 更新任务的状态为生成本地文件成功 & 本地文件路径
             ReportTask update = UpdateEntity.of(ReportTask.class, reportTask.getId())

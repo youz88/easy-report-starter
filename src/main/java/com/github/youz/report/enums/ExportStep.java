@@ -59,11 +59,8 @@ public enum ExportStep {
      * @return 报表导出步骤的枚举值
      */
     public static ExportStep of(int code) {
-        ExportStep exportStep = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(step -> step.code == code).findFirst()
                 .orElse(null);
-
-        ExceptionCode.EXPORT_NO_MATCH_CHAIN.assertIsTrue(exportStep != null);
-        return exportStep;
     }
 }
