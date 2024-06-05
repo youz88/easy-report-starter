@@ -135,7 +135,7 @@ public class ExcelExportUtil {
         } catch (Exception e) {
             // 如果出现异常，记录错误日志 & 抛出异常
             log.error("下载文件失败", e);
-            ExceptionCode.EXPORT_DOWNLOAD_FAIL.throwException();
+            ExceptionCode.DOWNLOAD_FAIL.throwException();
         }
     }
 

@@ -10,6 +10,7 @@ import com.github.youz.report.web.vo.ReportInfoVO;
 import com.github.youz.report.web.vo.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,9 +21,14 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    @PostMapping("/import")
+    @PostMapping("/import-local")
+    public Result<ImportFileVO> importFile(@RequestParam("file") MultipartFile file, ImportFileDTO reqDTO) {
+        return Result.success(reportService.importLocalFile(file, reqDTO));
+    }
+
+    @PostMapping("/import-cloud")
     public Result<ImportFileVO> importFile(@RequestBody ImportFileDTO reqDTO) {
-        return Result.success(reportService.importFile(reqDTO));
+        return Result.success(reportService.importCloudFile(reqDTO));
     }
 
     @PostMapping("/export")

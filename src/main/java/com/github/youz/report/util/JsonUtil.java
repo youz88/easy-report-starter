@@ -25,6 +25,8 @@ public class JsonUtil {
             configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             // 不确定的属性项上不要失败
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            // 空值不序列化
+            configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             // 提升序列化性能, null 值不序列化
             setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }

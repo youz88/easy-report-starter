@@ -6,18 +6,28 @@ import com.github.youz.report.web.dto.ReportListDTO;
 import com.github.youz.report.web.vo.ImportFileVO;
 import com.github.youz.report.web.vo.PageVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
 public interface ReportService {
 
     /**
-     * 导入文件方法
+     * 导入云文件
      *
      * @param reqDTO 导入文件请求DTO
      * @return 导入文件VO
      */
-    ImportFileVO importFile(ImportFileDTO reqDTO);
+    ImportFileVO importCloudFile(ImportFileDTO reqDTO);
+
+    /**
+     * 导入本地文件
+     *
+     * @param file   导入的本地文件
+     * @param reqDTO 导入文件请求DTO
+     * @return 导入文件VO
+     */
+    ImportFileVO importLocalFile(MultipartFile file, ImportFileDTO reqDTO);
 
     /**
      * 导出文件

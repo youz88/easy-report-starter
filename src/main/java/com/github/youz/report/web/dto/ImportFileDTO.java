@@ -12,9 +12,9 @@ public class ImportFileDTO {
     private Long userId;
 
     /**
-     * 导入上下文参数
+     * 上传文件路径
      */
-    private String context;
+    private String uploadFilePath;
 
     /**
      * 业务类型

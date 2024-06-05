@@ -4,16 +4,19 @@ import com.github.youz.report.config.ExportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
+import com.github.youz.report.enums.ExecutionType;
 import com.github.youz.report.enums.OperationType;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.export.bo.ExportContext;
 import com.github.youz.report.export.bo.PreExportResult;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
+import com.github.youz.report.imports.bo.ImportContext;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.service.ReportService;
 import com.github.youz.report.util.ExcelExportUtil;
 import com.github.youz.report.util.JsonUtil;
+import com.github.youz.report.util.MultipartFileUtil;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
@@ -21,8 +24,10 @@ import com.github.youz.report.web.vo.ImportFileVO;
 import com.github.youz.report.web.vo.PageVO;
 import com.github.youz.report.web.vo.ReportInfoVO;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -40,8 +45,17 @@ public class ReportServiceImpl implements ReportService {
     private final CompositeExportHandler compositeExportHandler;
 
     @Override
-    public ImportFileVO importFile(ImportFileDTO reqDTO) {
-        return null;
+    public ImportFileVO importCloudFile(ImportFileDTO reqDTO) {
+        // TODO 限制重复导入
+        String localFilePath = MultipartFileUtil.downloadFile(reqDTO.getUploadFilePath());
+        return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(reqDTO.getUploadFilePath()));
+    }
+
+    @Override
+    public ImportFileVO importLocalFile(MultipartFile file, ImportFileDTO reqDTO) {
+        // TODO 限制重复导入
+        String localFilePath = MultipartFileUtil.downloadFile(file);
+        return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(file.getOriginalFilename()));
     }
 
     @Override
@@ -121,5 +135,30 @@ public class ReportServiceImpl implements ReportService {
 
         // 批量插入切片任务
         reportTaskData.batchInsert(slicedTaskList);
+    }
+
+    /**
+     * 导入文件
+     *
+     * @param reqDTO        导入文件所需的请求参数
+     * @param localFilePath 本地文件路径
+     * @param fileName      文件名
+     * @return 导入文件的VO对象
+     */
+    private ImportFileVO importFile(ImportFileDTO reqDTO, String localFilePath, String fileName) {
+        ExceptionCode.DOWNLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
+
+        // 初始化报表任务
+        ReportTask reportTask = JsonUtil.convert(reqDTO, ReportTask.class)
+                .setOpType(OperationType.IMPORTS.getCode())
+                .setExecType(ExecutionType.ASYNC.getCode())
+                .setStatus(ReportStatus.WAIT.getCode())
+                .setFileName(fileName)
+                .setLocalFilePath(localFilePath)
+                .setContext(JsonUtil.toJson(ImportContext.build(reqDTO)));
+
+        // 保存报表任务
+        reportTaskData.insert(reportTask);
+        return ImportFileVO.assemblyData(reportTask);
     }
 }

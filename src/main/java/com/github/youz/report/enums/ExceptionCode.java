@@ -20,6 +20,12 @@ import java.util.Map;
 @AllArgsConstructor
 public enum ExceptionCode {
 
+    // 0-9999 通用错误
+    /**
+     * 下载文件失败
+     */
+    DOWNLOAD_FAIL(9001),
+
     // 10000-19999 导出错误
     /**
      * 导出处理器不能为空
@@ -35,11 +41,6 @@ public enum ExceptionCode {
      * 导出数据为空
      */
     EXPORT_DATA_EMPTY(10003),
-
-    /**
-     * 下载文件失败
-     */
-    EXPORT_DOWNLOAD_FAIL(10004),
 
     /**
      * 未找到匹配的导出链路

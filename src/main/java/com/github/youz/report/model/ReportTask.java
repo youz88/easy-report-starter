@@ -50,6 +50,9 @@ public class ReportTask implements Serializable {
     /** 上传文件路径 --> upload_file_path */
     private String uploadFilePath;
 
+    /** 失败文件路径 --> fail_file_path */
+    private String failFilePath;
+
     /** 执行时间(秒) --> exec_time */
     private Long execTime;
 

@@ -44,12 +44,12 @@ import java.util.stream.Collectors;
 public abstract class AbstractAnalyticalDataListener<T extends BasicImportTemplate> extends AnalysisEventListener<Map<Integer, String>> {
 
     /**
-     * 表头起始行(起始值为 1)
+     * 表头起始行(默认值为 1)
      */
     private int headRowIndex;
 
     /**
-     * 表体起始行
+     * 表体起始行(默认值为 2)
      */
     private int bodyRowIndex;
 
@@ -84,9 +84,9 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     private Map<Integer, List<String>> headMap;
 
     /**
-     * 临时文件路径
+     * 本地文件路径
      */
-    private String tempFilePath;
+    private String localFilePath;
 
     /**
      * 导入执行方法
@@ -241,7 +241,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * 文件读取
      */
     public void read() {
-        try (ExcelReader excelReader = EasyExcel.read(tempFilePath, this).build()) {
+        try (ExcelReader excelReader = EasyExcel.read(localFilePath, this).build()) {
             // 构建一个sheet 这里可以指定名字或者no
             ReadSheet readSheet = EasyExcel.readSheet(0)
                     .headRowNumber(getHeadRowIndex())

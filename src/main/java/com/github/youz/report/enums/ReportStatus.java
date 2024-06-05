@@ -19,13 +19,19 @@ public enum ReportStatus {
 
     LOCAL_FILE_SUCCESS(10, "生成本地文件成功"),
 
-    UNDONE(15, "未完成"),
+    CHECK(15, "数据校验中"),
 
-    COMPLETED(20, "已完成"),
+    IMPORTING(20, "数据导入中"),
 
-    EXECUTION_FAILED(50, "执行失败"),
+    UNDONE(99, "未完成"),
 
-    FAILED_UPLOAD_FILE(55, "上传文件失败"),
+    COMPLETED(100, "已完成"),
+
+    EXECUTION_FAILED(150, "执行失败"),
+
+    FAILED_UPLOAD_FILE(151, "上传文件失败"),
+
+    IMPORT_FAIL(152, "导入失败"),
     ;
 
     /**
