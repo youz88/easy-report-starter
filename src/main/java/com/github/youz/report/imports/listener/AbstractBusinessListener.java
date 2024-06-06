@@ -3,7 +3,9 @@ package com.github.youz.report.imports.listener;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
+import com.github.youz.report.data.RedisData;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.enums.MessageCode;
@@ -14,11 +16,15 @@ import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.util.ApplicationContextUtil;
 import com.github.youz.report.util.DateUtil;
 import com.github.youz.report.util.ExcelExportUtil;
+import com.github.youz.report.util.StreamUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 导入业务处理监听器
@@ -92,15 +98,9 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
             createFailFile();
         }
 
-        // 添加失败原因列
-        int failColumnIndex = getTargetFieldMap().size();
-        List<Object> list = new ArrayList<>(source);
-        if (source.size() == failColumnIndex) {
-            list.add(message);
-        } else {
-            list.set(failColumnIndex, message);
-        }
-        excelWriter.write(Collections.singletonList(list), writeSheet);
+        // 组装失败行 & 写入
+        List<Object> failRow = assemblyFailRow(rowIndex, source, message);
+        excelWriter.write(StreamUtil.toList(failRow), writeSheet);
 
         // 追加错误行下标
         getCheckFailRows().add(rowIndex);
@@ -110,8 +110,8 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
      * 数据校验前置处理
      */
     protected void beforeCheckData() {
-        // 监听配置初始化
-        listenerInitConfig();
+        // 监听行配置初始化
+        listenerRowConfig();
 
         // 更新导入任务状态 & 执行时间
         ReportTask update = new ReportTask()
@@ -163,7 +163,8 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
         }
         ApplicationContextUtil.getBean(ReportTaskData.class).updateById(reportTask);
 
-        //TODO 删除导入缓存
+        // 删除导入缓存
+        importUnlock(context);
     }
 
     /**
@@ -179,7 +180,24 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
                 .setCompleteTime(DateUtil.now());
         ApplicationContextUtil.getBean(ReportTaskData.class).updateById(update);
 
-        //TODO 删除导入缓存
+        // 删除导入缓存
+        importUnlock(context);
+    }
+
+    /**
+     * 监听行配置
+     */
+    protected void listenerRowConfig() {
+        // 表头起始行 & 表体起始行
+        setHeadRowIndex(1);
+        setBodyRowIndex(2);
+    }
+
+    /**
+     * 读取导入文件
+     */
+    protected void read() {
+        super.read(context.getLocalFilePath());
     }
 
     /**
@@ -187,13 +205,14 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
      */
     private void createFailFile() {
         // 失败文件地址
-        this.failFilePath = getLocalFilePath().substring(0, getLocalFilePath().lastIndexOf(ReportConst.FULL_STOP_SYMBOL))
+        String localFilePath = context.getLocalFilePath();
+        this.failFilePath = localFilePath.substring(0, localFilePath.lastIndexOf(ReportConst.FULL_STOP_SYMBOL))
                 + MessageCode.IMPORT_FAIL_FILE_SUFFIX_NAME.localMessage()
-                + getLocalFilePath().substring(getLocalFilePath().lastIndexOf(ReportConst.FULL_STOP_SYMBOL));
+                + localFilePath.substring(localFilePath.lastIndexOf(ReportConst.FULL_STOP_SYMBOL));
 
         // 表头追加失败原因列
         List<List<String>> failHeadList = new ArrayList<>(getHeadMap().values());
-        failHeadList.add(Collections.singletonList(MessageCode.IMPORT_FAIL_REASON.localMessage()));
+        failHeadList.add(StreamUtil.toList(MessageCode.IMPORT_FAIL_REASON.localMessage()));
 
         // 创建writer,sheet对象
         this.excelWriter = ExcelExportUtil.createExcelWriter(failFilePath);
@@ -201,14 +220,42 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
     }
 
     /**
-     * 监听行配置
+     * 删除导入缓存
+     *
+     * @param context 导入上下文
      */
-    private void listenerInitConfig() {
-        // 设置本地文件路径
-        setLocalFilePath(context.getLocalFilePath());
+    private void importUnlock(ImportContext context) {
+        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, context.getUserId(), context.getBusinessType());
+        ApplicationContextUtil.getBean(RedisData.class).importUnlock(cacheKey);
+    }
 
-        // 表头起始行 & 表体起始行
-        setHeadRowIndex(1);
-        setBodyRowIndex(2);
+    /**
+     * 将指定行号的错误数据行组装成包含错误信息的List对象
+     *
+     * @param rowIndex 行号
+     * @param source   数据源集合
+     * @param message  错误信息
+     * @return 组装后的包含错误信息的List对象
+     */
+    private List<Object> assemblyFailRow(Integer rowIndex, Collection<String> source, String message) {
+        List<Object> list = new ArrayList<>(source);
+        // 如果该行为表头行, 无需填写失败原因
+        if (rowIndex < getBodyRowIndex() - ReportConst.ONE) {
+            return list;
+        }
+
+        // 添加错误信息
+        int failColumnIndex = getHeadMap().size();
+        if (source.size() == failColumnIndex) {
+            // 末尾添加错误信息
+            list.add(message);
+        } else {
+            // 为避免数据源长度小于表头长度, 补全数据源
+            while (list.size() <= failColumnIndex) {
+                list.add(ReportConst.EMPTY);
+            }
+            list.set(failColumnIndex, message);
+        }
+        return list;
     }
 }

@@ -17,6 +17,23 @@ public class StreamUtil {
     /**
      * 抽取集合中的某个属性为一个集合
      *
+     * @param list 集合
+     * @param <T>  属性类型
+     * @return 属性的集合
+     */
+    @SafeVarargs
+    public static <T> List<T> toList(T... list) {
+        if (list == null || list.length == 0) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(list)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 抽取集合中的某个属性为一个集合
+     *
      * @param list    集合
      * @param mapping 查询属性的方法
      * @param filters 筛选条件

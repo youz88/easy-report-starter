@@ -19,6 +19,7 @@ import com.github.youz.report.converter.ReportConverterLoader;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.imports.bo.BasicImportTemplate;
+import com.github.youz.report.imports.bo.ImportDynamicColumn;
 import com.github.youz.report.imports.bo.ImportInvokeResult;
 import com.github.youz.report.imports.check.CompositeImportCheckHandler;
 import com.github.youz.report.util.ApplicationContextUtil;
@@ -28,7 +29,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -88,11 +88,6 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * 工作表名称
      */
     private String sheetName;
-
-    /**
-     * 本地文件路径
-     */
-    private String localFilePath;
 
     /**
      * 导入执行方法
@@ -158,7 +153,9 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         checkHead(headMap, context);
 
         // 初始化表头 & 工作表名称
-        this.headMap = StreamUtil.toMap(headMap.entrySet(), Map.Entry::getKey, entry -> Collections.singletonList(entry.getValue()));
+        this.headMap = StreamUtil.toMap(headMap.entrySet(),
+                Map.Entry::getKey,
+                entry -> StreamUtil.toList(entry.getValue()));
         this.sheetName = context.readSheetHolder().getSheetName();
     }
 
@@ -236,7 +233,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     /**
      * 文件读取
      */
-    public void read() {
+    public void read(String localFilePath) {
         try (ExcelReader excelReader = EasyExcel.read(localFilePath, this).build()) {
             // 构建一个sheet 这里可以指定名字或者no
             ReadSheet readSheet = EasyExcel.readSheet(0)
@@ -259,7 +256,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         Integer rowIndex = context.readRowHolder().getRowIndex();
 
         // 判断当前行是否为表体起始行
-        if (rowIndex >= bodyRowIndex - 1) {
+        if (rowIndex >= bodyRowIndex - ReportConst.ONE) {
             return Boolean.FALSE;
         }
 
@@ -303,6 +300,11 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
                 appendFailRow(context.readRowHolder().getRowIndex(), rowMap.values(), e.getMessage());
                 return null;
             }
+        }
+
+        // 设置数据行下标
+        if (target != null) {
+            target.setIndex(context.readRowHolder().getRowIndex() + ReportConst.ONE);
         }
         return target;
     }
@@ -369,9 +371,12 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      */
     private void appendHead(Map<Integer, String> rowMap) {
         rowMap.forEach((k, v) -> {
-            List<String> headNames = headMap.get(k);
+            if (StringUtil.isBlank(v)) {
+                return;
+            }
 
             // 追加表头
+            List<String> headNames = headMap.get(k);
             if (!headNames.contains(v)) {
                 headNames.add(v);
             }
@@ -406,17 +411,21 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
 
         // 如果是动态列对象
         if (field.getType().isAssignableFrom(List.class)) {
-            Object itemListObj = ReflectionUtils.getField(field, target);
-            if (Objects.isNull(itemListObj)) {
-                itemListObj = Lists.newArrayList();
-                ReflectionUtils.setField(field, target, itemListObj);
+            Object dynamicColumnObject = ReflectionUtils.getField(field, target);
+
+            // 初始化List
+            if (Objects.isNull(dynamicColumnObject)) {
+                dynamicColumnObject = new ArrayList<>();
+                ReflectionUtils.setField(field, target, dynamicColumnObject);
             }
-            List itemList = (List) itemListObj;
 
             // 添加动态列对象
-            String[] headNames = field.getAnnotation(ExcelCell.class).value();
-//            MultistageItemBO multistageItem = MultistageItemBO.init(parseFieldValue(field, value, context), Arrays.asList(headNames));
-//            itemList.add(multistageItem);
+            List dynamicColumnList = (List) dynamicColumnObject;
+            ImportDynamicColumn multistageItem = ImportDynamicColumn.build(parseFieldValue(field, value, context));
+            dynamicColumnList.add(multistageItem);
+
+            // 因为是List动态列, 所以手动补位后续属性下标和值
+            targetFieldMap.put(columnIndex + 1, field);
         } else {
             // 设置对象属性值
             ReflectionUtils.setField(field, target, parseFieldValue(field, value, context));
@@ -439,7 +448,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         // 不需要进行属性转换
         ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
         if (Objects.isNull(excelCell.converter()) || excelCell.converter().isAssignableFrom(AutoConverter.class)) {
-            return value;
+            return excelCell.dynamicColumn() ? ImportDynamicColumn.build(value) : value;
         }
 
         // 获取导入转换器实例 & 转换数据
@@ -447,10 +456,8 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         Converter<?> converterInstance = ReportConverterLoader.loadImportConverter().get(ConverterKeyBuild.buildKey(converter));
         ExcelContentProperty excelContentProperty = new ExcelContentProperty();
         excelContentProperty.setField(field);
-        if (Objects.isNull(value)) {
-            value = ReportConst.EMPTY;
-        }
-        return converterInstance.convertToJavaData(new ReadConverterContext<>(new ReadCellData<>(value), excelContentProperty, context));
+        Object convertVal = converterInstance.convertToJavaData(new ReadConverterContext<>(new ReadCellData<>(value), excelContentProperty, context));
+        return excelCell.dynamicColumn() ? ImportDynamicColumn.build(convertVal) : convertVal;
     }
 
     /**
@@ -472,8 +479,14 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
                 continue;
             }
 
-            // 校验表头与模版是否一致
+            // 获取对应属性, 为空则表示该列没有设置对应的属性映射关系 | 属性类型为动态列则跳过
             Field field = targetFieldMap.get(entry.getKey());
+            if (field == null || field.getType().isAssignableFrom(ImportDynamicColumn.class)
+                    || field.getType().isAssignableFrom(List.class)) {
+                continue;
+            }
+
+            // 校验表头与模版是否一致
             String headName = field.getAnnotation(ExcelCell.class).value()[0];
             ExceptionCode.IMPORT_HEAD_DIFF_TEMPLATE_FAIL.assertIsTrue(entry.getValue().equals(headName));
         }

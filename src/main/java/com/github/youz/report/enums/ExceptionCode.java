@@ -45,6 +45,8 @@ public enum ExceptionCode {
 
     IMPORT_DOWNLOAD_FAIL(20006, MessageCode.IMPORT_DOWNLOAD_FAIL),
 
+    IMPORT_IN_PROGRESS(20007, MessageCode.IMPORT_IN_PROGRESS),
+
     ;
 
     /**

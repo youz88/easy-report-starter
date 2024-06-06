@@ -33,6 +33,17 @@
             <version>${hikaricp.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Json Tool-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -47,6 +58,7 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- excel -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>

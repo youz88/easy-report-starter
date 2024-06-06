@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
  */
 public class TimestampConverter extends AbstractConverter<Long> {
 
-
     @Override
     public Long convertToJavaData(ReadConverterContext<?> context) {
         String dataStr = getDataStr(context);

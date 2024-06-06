@@ -47,6 +47,8 @@ public enum MessageCode {
 
     IMPORT_NETWORK_ANOMALY("import.network.anomaly", "网络异常"),
 
+    IMPORT_IN_PROGRESS("import.in.progress", "导入正在执行中,请稍后重试"),
+
     ;
 
     private final String code;

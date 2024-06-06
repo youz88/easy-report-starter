@@ -2,6 +2,7 @@ package com.github.youz.report.export.bo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.github.youz.report.converter.ReportConverterLoader;
+import com.github.youz.report.util.StreamUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -159,7 +160,7 @@ public class BasicExportTemplate {
             //noinspection unchecked
             List<DynamicColumn> items = (List<DynamicColumn>) obj;
             for (DynamicColumn item : items) {
-                filterHead.add(new ArrayList<>(Arrays.asList(item.getHead())));
+                filterHead.add(StreamUtil.toList(item.getHead()));
             }
         } else if (field.getType().isAssignableFrom(DynamicColumn.class)) {
             // 动态单表头
@@ -169,10 +170,10 @@ public class BasicExportTemplate {
             }
 
             DynamicColumn item = (DynamicColumn) obj;
-            filterHead.add(new ArrayList<>(Arrays.asList(item.getHead())));
+            filterHead.add(StreamUtil.toList(item.getHead()));
         } else {
             // 普通对象
-            filterHead.add(new ArrayList<>(Arrays.asList(field.getAnnotation(ExcelProperty.class).value())));
+            filterHead.add(StreamUtil.toList(field.getAnnotation(ExcelProperty.class).value()));
         }
     }
 

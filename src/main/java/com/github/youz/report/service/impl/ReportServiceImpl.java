@@ -1,7 +1,9 @@
 package com.github.youz.report.service.impl;
 
 import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
+import com.github.youz.report.data.RedisData;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ExecutionType;
@@ -11,7 +13,6 @@ import com.github.youz.report.export.bo.ExportContext;
 import com.github.youz.report.export.bo.PreExportResult;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
-import com.github.youz.report.imports.bo.ImportContext;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.service.ReportService;
 import com.github.youz.report.util.ExcelExportUtil;
@@ -40,20 +41,30 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportTaskData reportTaskData;
 
+    private final RedisData redisData;
+
     private final ExportProperties exportProperties;
 
     private final CompositeExportHandler compositeExportHandler;
 
     @Override
     public ImportFileVO importCloudFile(ImportFileDTO reqDTO) {
-        // TODO 限制重复导入
+        // 校验是否已有导入任务在执行中
+        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
+        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
+
+        // 下载文件
         String localFilePath = MultipartFileUtil.downloadFile(reqDTO.getUploadFilePath());
         return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(reqDTO.getUploadFilePath()));
     }
 
     @Override
     public ImportFileVO importLocalFile(MultipartFile file, ImportFileDTO reqDTO) {
-        // TODO 限制重复导入
+        // 校验是否已有导入任务在执行中
+        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
+        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
+
+        // 下载文件
         String localFilePath = MultipartFileUtil.downloadFile(file);
         return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(file.getOriginalFilename()));
     }
@@ -154,8 +165,7 @@ public class ReportServiceImpl implements ReportService {
                 .setExecType(ExecutionType.ASYNC.getCode())
                 .setStatus(ReportStatus.WAIT.getCode())
                 .setFileName(fileName)
-                .setLocalFilePath(localFilePath)
-                .setContext(JsonUtil.toJson(ImportContext.build(reqDTO)));
+                .setLocalFilePath(localFilePath);
 
         // 保存报表任务
         reportTaskData.insert(reportTask);
