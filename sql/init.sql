@@ -13,6 +13,7 @@ create table report_task
     file_name        varchar(64)         default '' not null comment '文件名',
     local_file_path   varchar(255)       default '' not null comment '临时文件路径',
     upload_file_path varchar(255)        default '' not null comment '上传文件路径',
+    fail_file_path   varchar(255)        default '' not null comment '失败文件路径',
     exec_time        bigint unsigned     default 0  not null comment '执行时间(秒)',
     complete_time    bigint unsigned     default 0  not null comment '完成时间(秒)',
     error_msg        varchar(255)        default '' not null comment '错误描述',
