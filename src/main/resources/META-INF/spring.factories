@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.youz.report.config.ReportAutoConfiguration
+  com.github.youz.report.ReportAutoConfiguration

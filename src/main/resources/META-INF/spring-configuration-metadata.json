@@ -51,6 +51,20 @@
       "defaultValue": 100
     },
     {
+      "name": "report.export.scan-wait-exec-cron",
+      "type": "java.lang.String",
+      "description": "扫描待执行导出任务",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
+      "defaultValue": "0 0\/2 * * * ?"
+    },
+    {
+      "name": "report.export.scan-wait-upload-cron",
+      "type": "java.lang.String",
+      "description": "扫描待上传导出任务(仅限状态为上传失败)",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
+      "defaultValue": "0 0\/3 * * * ?"
+    },
+    {
       "name": "report.export.slices-task-max-size",
       "type": "java.lang.Integer",
       "description": "切片子任务所需数据最大值",
