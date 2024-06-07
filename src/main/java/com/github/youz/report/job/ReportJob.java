@@ -23,7 +23,7 @@ public class ReportJob {
     /**
      * 扫描待执行导出任务
      */
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "#{@reportProperties.export.scanWaitExecCron}")
     public void scanWaitExecExportTask() {
         // 扫描待执行导出任务
         List<Integer> statuses = Arrays.asList(ReportStatus.WAIT.getCode(),
@@ -49,7 +49,7 @@ public class ReportJob {
     /**
      * 扫描待上传导出任务
      */
-    @Scheduled(cron = "0 0/3 * * * ?")
+    @Scheduled(cron = "#{@reportProperties.export.scanWaitUploadCron}")
     public void scanWaitUploadExportTask() {
         // 扫描待上传导出任务
         List<Integer> statuses = Collections.singletonList(ReportStatus.FAILED_UPLOAD_FILE.getCode());

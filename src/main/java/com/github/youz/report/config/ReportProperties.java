@@ -2,8 +2,10 @@ package com.github.youz.report.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
+@Configuration
 @ConfigurationProperties(prefix = "report")
 public class ReportProperties {
 
@@ -74,5 +76,15 @@ public class ReportProperties {
          * 为避免大量异步任务持续查询对数据库造成压力, 所以可配置查询睡眠间隔时间(毫秒)
          */
         private long asyncTaskSleepTime = 100;
+
+        /**
+         * 扫描待执行导出任务
+         */
+        private String scanWaitExecCron = "0 0/2 * * * ?";
+
+        /**
+         * 扫描待上传导出任务(仅限状态为上传失败)
+         */
+        private String scanWaitUploadCron = "0 0/3 * * * ?";
     }
 }

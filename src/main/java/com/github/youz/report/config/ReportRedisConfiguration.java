@@ -10,7 +10,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-public class RedisConfiguration {
+public class ReportRedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -23,7 +23,7 @@ public class RedisConfiguration {
             name = {"redisTemplate"}
     )
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory, RedisSerializer<Object> jackson2JsonRedisSerializer) {
-        RedisTemplate<String, Object> template = new RedisTemplate();
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(jackson2JsonRedisSerializer);
