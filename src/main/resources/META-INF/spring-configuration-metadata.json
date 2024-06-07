@@ -1,64 +1,74 @@
 {
   "groups": [
     {
-      "name": "report.export",
-      "type": "com.github.youz.report.config.ExportProperties",
-      "sourceType": "com.github.youz.report.config.ExportProperties"
+      "name": "report",
+      "type": "com.github.youz.report.config.ReportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties"
     },
     {
-      "name": "report.import",
-      "type": "com.github.youz.report.config.ImportProperties",
-      "sourceType": "com.github.youz.report.config.ImportProperties"
+      "name": "report.common",
+      "type": "com.github.youz.report.config.ReportProperties$CommonProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties"
+    },
+    {
+      "name": "report.export",
+      "type": "com.github.youz.report.config.ReportProperties$ExportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties"
+    },
+    {
+      "name": "report.imports",
+      "type": "com.github.youz.report.config.ReportProperties$ImportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties"
     }
   ],
   "properties": [
     {
+      "name": "report.common.upload-cloud",
+      "type": "java.lang.Boolean",
+      "description": "导出文件是否上传到云存储",
+      "sourceType": "com.github.youz.report.config.ReportProperties$CommonProperties",
+      "defaultValue": false
+    },
+    {
       "name": "report.export.async-task-max-size",
       "type": "java.lang.Integer",
       "description": "异步任务执行所需数据最大值",
-      "sourceType": "com.github.youz.report.config.ExportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
       "defaultValue": 200
     },
     {
       "name": "report.export.async-task-sleep-time",
       "type": "java.lang.Long",
       "description": "为避免大量异步任务持续查询对数据库造成压力, 所以可配置查询睡眠间隔时间(毫秒)",
-      "sourceType": "com.github.youz.report.config.ExportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
       "defaultValue": 100
     },
     {
       "name": "report.export.page-size",
       "type": "java.lang.Integer",
       "description": "默认分页大小",
-      "sourceType": "com.github.youz.report.config.ExportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
       "defaultValue": 100
     },
     {
       "name": "report.export.slices-task-max-size",
       "type": "java.lang.Integer",
       "description": "切片子任务所需数据最大值",
-      "sourceType": "com.github.youz.report.config.ExportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ExportProperties",
       "defaultValue": 500000
     },
     {
-      "name": "report.export.upload-cloud",
-      "type": "java.lang.Boolean",
-      "description": "导出文件是否上传到云存储",
-      "sourceType": "com.github.youz.report.config.ExportProperties",
-      "defaultValue": false
-    },
-    {
-      "name": "report.import.batch-row",
+      "name": "report.imports.batch-row",
       "type": "java.lang.Integer",
       "description": "批量处理行数",
-      "sourceType": "com.github.youz.report.config.ImportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ImportProperties",
       "defaultValue": 100
     },
     {
-      "name": "report.import.limit-max-row",
+      "name": "report.imports.limit-max-row",
       "type": "java.lang.Integer",
       "description": "限制最大行数",
-      "sourceType": "com.github.youz.report.config.ImportProperties",
+      "sourceType": "com.github.youz.report.config.ReportProperties$ImportProperties",
       "defaultValue": 20000
     }
   ],
