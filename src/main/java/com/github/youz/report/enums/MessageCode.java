@@ -49,6 +49,10 @@ public enum MessageCode {
 
     IMPORT_IN_PROGRESS("import.in.progress", "导入正在执行中,请稍后重试"),
 
+    IMPORT_ERROR_MSG_FORMAT("import.error.message.format", "导入失败错误消息格式化"),
+
+    IMPORT_CELL_NOT_NULL("import.cell.not.null", "单元格不能为空"),
+
     ;
 
     private final String code;

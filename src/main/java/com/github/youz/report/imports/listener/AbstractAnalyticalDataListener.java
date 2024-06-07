@@ -12,7 +12,7 @@ import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.read.metadata.holder.ReadSheetHolder;
-import com.github.youz.report.annotation.ExcelCell;
+import com.github.youz.report.annotation.ImportCell;
 import com.github.youz.report.config.ImportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.converter.ReportConverterLoader;
@@ -421,8 +421,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
 
             // 添加动态列对象
             List dynamicColumnList = (List) dynamicColumnObject;
-            ImportDynamicColumn multistageItem = ImportDynamicColumn.build(parseFieldValue(field, value, context));
-            dynamicColumnList.add(multistageItem);
+            dynamicColumnList.add(parseFieldValue(field, value, context));
 
             // 因为是List动态列, 所以手动补位后续属性下标和值
             targetFieldMap.put(columnIndex + 1, field);
@@ -442,22 +441,27 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * @return 解析结果
      */
     private Object parseFieldValue(Field field, String value, AnalysisContext context) throws Exception {
+        // 空值处理
+        if (value == null) {
+            value = ReportConst.EMPTY;
+        }
+
         // 导入参数校验
         ApplicationContextUtil.getBean(CompositeImportCheckHandler.class).check(field, value);
 
         // 不需要进行属性转换
-        ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
-        if (Objects.isNull(excelCell.converter()) || excelCell.converter().isAssignableFrom(AutoConverter.class)) {
-            return excelCell.dynamicColumn() ? ImportDynamicColumn.build(value) : value;
+        ImportCell importCell = field.getAnnotation(ImportCell.class);
+        if (Objects.isNull(importCell.converter()) || importCell.converter().isAssignableFrom(AutoConverter.class)) {
+            return importCell.dynamicColumn() ? ImportDynamicColumn.build(value) : value;
         }
 
         // 获取导入转换器实例 & 转换数据
-        Class<? extends Converter<?>> converter = excelCell.converter();
+        Class<? extends Converter<?>> converter = importCell.converter();
         Converter<?> converterInstance = ReportConverterLoader.loadImportConverter().get(ConverterKeyBuild.buildKey(converter));
         ExcelContentProperty excelContentProperty = new ExcelContentProperty();
         excelContentProperty.setField(field);
         Object convertVal = converterInstance.convertToJavaData(new ReadConverterContext<>(new ReadCellData<>(value), excelContentProperty, context));
-        return excelCell.dynamicColumn() ? ImportDynamicColumn.build(convertVal) : convertVal;
+        return importCell.dynamicColumn() ? ImportDynamicColumn.build(convertVal) : convertVal;
     }
 
     /**
@@ -481,13 +485,12 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
 
             // 获取对应属性, 为空则表示该列没有设置对应的属性映射关系 | 属性类型为动态列则跳过
             Field field = targetFieldMap.get(entry.getKey());
-            if (field == null || field.getType().isAssignableFrom(ImportDynamicColumn.class)
-                    || field.getType().isAssignableFrom(List.class)) {
+            if (field == null || field.getAnnotation(ImportCell.class).dynamicColumn()) {
                 continue;
             }
 
             // 校验表头与模版是否一致
-            String headName = field.getAnnotation(ExcelCell.class).value()[0];
+            String headName = field.getAnnotation(ImportCell.class).value()[0];
             ExceptionCode.IMPORT_HEAD_DIFF_TEMPLATE_FAIL.assertIsTrue(entry.getValue().equals(headName));
         }
     }
@@ -503,14 +506,14 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         while (!(clazz.isAssignableFrom(Object.class))) {
             Field[] fields = clazz.getDeclaredFields();
             Arrays.stream(fields)
-                    .filter(f -> f.isAnnotationPresent(ExcelCell.class))
+                    .filter(f -> f.isAnnotationPresent(ImportCell.class))
                     .forEach(f -> {
-                        ExcelCell excelCell = f.getAnnotation(ExcelCell.class);
-                        ExceptionCode.IMPORT_INDEX_REPEATED_FAIL.assertIsTrue(!fieldMap.containsKey(excelCell.index()), excelCell.index());
+                        ImportCell importCell = f.getAnnotation(ImportCell.class);
+                        ExceptionCode.IMPORT_INDEX_REPEATED_FAIL.assertIsTrue(!fieldMap.containsKey(importCell.index()), importCell.index());
 
                         // 追加表头下标-属性映射
                         f.setAccessible(Boolean.TRUE);
-                        fieldMap.put(excelCell.index(), f);
+                        fieldMap.put(importCell.index(), f);
                     });
             clazz = clazz.getSuperclass();
         }

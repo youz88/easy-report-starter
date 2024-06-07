@@ -1,7 +1,7 @@
 package com.github.youz.report.converter.imports;
 
 import com.alibaba.excel.converters.ReadConverterContext;
-import com.github.youz.report.annotation.ExcelCell;
+import com.github.youz.report.annotation.ImportCell;
 import com.github.youz.report.enums.ImportEnum;
 import com.mybatisflex.core.util.StringUtil;
 
@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * 枚举值转换器
  */
-public class EnumConverter extends AbstractConverter<Integer> {
+public class ImportEnumConverter extends AbstractConverter<Integer> {
 
     @Override
     public Integer convertToJavaData(ReadConverterContext<?> context) {
@@ -22,8 +22,8 @@ public class EnumConverter extends AbstractConverter<Integer> {
 
         // 获取枚举类
         Field field = context.getContentProperty().getField();
-        ExcelCell excelCell = field.getAnnotation(ExcelCell.class);
-        Class<? extends ImportEnum> linkEnum = excelCell.linkEnum();
+        ImportCell importCell = field.getAnnotation(ImportCell.class);
+        Class<? extends ImportEnum> linkEnum = importCell.linkEnum();
 
         // 获取枚举值
         Integer code = Arrays.stream(linkEnum.getEnumConstants())

@@ -2,7 +2,7 @@ package com.github.youz.report.converter.imports;
 
 import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.converters.ReadConverterContext;
-import com.github.youz.report.annotation.ExcelCell;
+import com.github.youz.report.annotation.ImportCell;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.ExceptionCode;
 
@@ -32,8 +32,8 @@ public abstract class AbstractConverter<T> implements Converter<T> {
      */
     public void assertTrue(Boolean expression, ReadConverterContext<?> context) {
         if (!expression) {
-            String value = context.getContentProperty().getField().getAnnotation(ExcelCell.class).value()[0];
-            ExceptionCode.IMPORT_FIELD_FORMAT_FAIL.throwException(value + "格式错误");
+            String value = context.getContentProperty().getField().getAnnotation(ImportCell.class).value()[0];
+            ExceptionCode.IMPORT_FIELD_FORMAT_FAIL.throwException(value);
         }
     }
 

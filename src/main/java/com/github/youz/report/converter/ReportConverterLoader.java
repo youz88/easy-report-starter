@@ -39,10 +39,9 @@ public class ReportConverterLoader {
         importConverter = new HashMap<>(16);
 
         // 添加转换器
-        putImportConverter(new BigDecimalConverter());
-        putImportConverter(new TimestampConverter());
-        putImportConverter(new PhoneNumberConverter());
-        putImportConverter(new EnumConverter());
+        putImportConverter(new ImportBigDecimalConverter());
+        putImportConverter(new ImportDateConverter());
+        putImportConverter(new ImportEnumConverter());
     }
 
     /**

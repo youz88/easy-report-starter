@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * 时间戳转换器(秒)
  */
-public class TimestampConverter extends AbstractConverter<Long> {
+public class ImportDateConverter extends AbstractConverter<Long> {
 
     @Override
     public Long convertToJavaData(ReadConverterContext<?> context) {

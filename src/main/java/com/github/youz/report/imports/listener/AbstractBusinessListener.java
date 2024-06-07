@@ -35,16 +35,6 @@ import java.util.Objects;
 public abstract class AbstractBusinessListener<T extends BasicImportTemplate> extends AbstractAnalyticalDataListener<T> {
 
     /**
-     * 导入失败文件后缀名称
-     */
-    private static final String FAIL_SUFFIX_NAME = "_导入失败";
-
-    /**
-     * 导入失败文件后缀名称
-     */
-    private static final String ERROR_MSG_FORMAT = "%d条记录操作成功, %d条记录操作失败";
-
-    /**
      * 导入上下文
      */
     private ImportContext context;
@@ -145,7 +135,7 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
         int failCount = getCheckFailRows().size();
         if (failCount == ReportConst.ZER0) {
             // 导入成功
-            reportTask.setErrorMsg(String.format(ERROR_MSG_FORMAT, getTotal(), ReportConst.ZER0));
+            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal(), ReportConst.ZER0));
             reportTask.setStatus(ReportStatus.COMPLETED.getCode());
         } else {
             // 文件上传
@@ -157,7 +147,7 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
 //            SpringContext.getBean(ResourceData.class).uploadBinary(key, multipartFile);
 
             // 更新失败原因
-            reportTask.setErrorMsg(String.format(ERROR_MSG_FORMAT, getTotal() - failCount, failCount));
+            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal() - failCount, failCount));
 //            reportTask.setFailFilePath(key);
             reportTask.setStatus(customStatusByCheckFail().getCode());
         }

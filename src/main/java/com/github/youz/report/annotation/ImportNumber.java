@@ -1,5 +1,7 @@
 package com.github.youz.report.annotation;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.*;
 
 /**
@@ -8,7 +10,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 @Documented
-public @interface ExcelNumber {
+@ImportNull
+public @interface ImportNumber {
 
     /**
      * 最小数字
@@ -24,4 +27,12 @@ public @interface ExcelNumber {
      * 错误提示
      */
     String value() default "";
+
+    /**
+     * 是否校验空值
+     */
+    @AliasFor(
+            annotation = ImportNull.class, attribute = "checkNull"
+    )
+    boolean checkNull() default false;
 }

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 /**
  * 数字转换器
  */
-public class BigDecimalConverter extends AbstractConverter<BigDecimal> {
+public class ImportBigDecimalConverter extends AbstractConverter<BigDecimal> {
 
     /**
      * 数字正则匹配
@@ -21,7 +21,7 @@ public class BigDecimalConverter extends AbstractConverter<BigDecimal> {
     public BigDecimal convertToJavaData(ReadConverterContext<?> context) {
         String dataStr = getDataStr(context);
         if (StringUtil.isBlank(dataStr)) {
-            return BigDecimal.ZERO;
+            return null;
         }
 
         // (”,“)替换兼容处理

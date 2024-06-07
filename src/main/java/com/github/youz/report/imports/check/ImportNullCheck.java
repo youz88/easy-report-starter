@@ -1,8 +1,6 @@
 package com.github.youz.report.imports.check;
 
-import com.github.youz.report.annotation.ExcelNotNull;
-import com.github.youz.report.enums.ExceptionCode;
-import com.mybatisflex.core.util.StringUtil;
+import com.github.youz.report.annotation.ImportNull;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -11,16 +9,15 @@ import java.lang.reflect.Field;
  * 非空校验
  */
 @Component
-public class ImportNullCheck implements ImportCheck {
+public class ImportNullCheck extends AbstractImportCheck {
 
     @Override
     public boolean support(Field field) {
-        return field.isAnnotationPresent(ExcelNotNull.class);
+        return field.isAnnotationPresent(ImportNull.class);
     }
 
     @Override
-    public void check(Field field, String value) {
-        ExcelNotNull notNull = field.getAnnotation(ExcelNotNull.class);
-        ExceptionCode.IMPORT_FAIL_CUSTOM_MSG.assertIsTrue(StringUtil.isNotBlank(value), notNull.value());
+    public void customCheck(Field field, String value) {
+
     }
 }
