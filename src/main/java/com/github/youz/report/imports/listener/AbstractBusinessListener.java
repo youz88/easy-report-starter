@@ -3,10 +3,12 @@ package com.github.youz.report.imports.listener;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.RedisData;
 import com.github.youz.report.data.ReportTaskData;
+import com.github.youz.report.data.UploadCloudData;
 import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.enums.MessageCode;
 import com.github.youz.report.enums.ReportStatus;
@@ -135,22 +137,25 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
         int failCount = getCheckFailRows().size();
         if (failCount == ReportConst.ZER0) {
             // 导入成功
-            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal(), ReportConst.ZER0));
-            reportTask.setStatus(ReportStatus.COMPLETED.getCode());
+            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal(), ReportConst.ZER0))
+                    .setStatus(ReportStatus.COMPLETED.getCode());
         } else {
-            // 文件上传
-//            String fileName = failFilePath.substring(failFilePath.lastIndexOf(File.separator) + 1);
-//            String key = String.format(BizConst.RESOURCE_IMPORT_TEMPLATE, reportImport.getGid(),
-//                    Md5Utils.getMD5(OrderUtil.generatorOrderno().getBytes(StandardCharsets.UTF_8)), fileName);
-//            File file = new File(failFilePath);
-//            MultipartFile multipartFile = MultipartFileUtil.fileToMultipartFile(file);
-//            SpringContext.getBean(ResourceData.class).uploadBinary(key, multipartFile);
+            // 如果开启上传云存储, 则上传失败文件
+            if (ApplicationContextUtil.getBean(ReportProperties.class).getCommon().isUploadCloud()) {
+                try {
+                    failFilePath = ApplicationContextUtil.getBean(UploadCloudData.class).uploadFile(failFilePath);
+                } catch (Exception e) {
+                    log.error("上传失败文件到云存储异常", e);
+                }
+            }
 
             // 更新失败原因
-            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal() - failCount, failCount));
-//            reportTask.setFailFilePath(key);
-            reportTask.setStatus(customStatusByCheckFail().getCode());
+            reportTask.setErrorMsg(MessageCode.IMPORT_ERROR_MSG_FORMAT.localMessage(getTotal() - failCount, failCount))
+                    .setFailFilePath(failFilePath)
+                    .setStatus(customStatusByCheckFail().getCode());
         }
+
+        // 更新导入任务
         ApplicationContextUtil.getBean(ReportTaskData.class).updateById(reportTask);
 
         // 删除导入缓存
@@ -194,15 +199,15 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
      * 创建导入失败文件
      */
     private void createFailFile() {
+        // 表头追加失败原因列
+        List<List<String>> failHeadList = new ArrayList<>(getHeadMap().values());
+        failHeadList.add(StreamUtil.toList(MessageCode.IMPORT_FAIL_REASON.localMessage()));
+
         // 失败文件地址
         String localFilePath = context.getLocalFilePath();
         this.failFilePath = localFilePath.substring(0, localFilePath.lastIndexOf(ReportConst.FULL_STOP_SYMBOL))
                 + MessageCode.IMPORT_FAIL_FILE_SUFFIX_NAME.localMessage()
                 + localFilePath.substring(localFilePath.lastIndexOf(ReportConst.FULL_STOP_SYMBOL));
-
-        // 表头追加失败原因列
-        List<List<String>> failHeadList = new ArrayList<>(getHeadMap().values());
-        failHeadList.add(StreamUtil.toList(MessageCode.IMPORT_FAIL_REASON.localMessage()));
 
         // 创建writer,sheet对象
         this.excelWriter = ExcelExportUtil.createExcelWriter(failFilePath);

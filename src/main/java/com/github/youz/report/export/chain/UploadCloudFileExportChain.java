@@ -1,6 +1,6 @@
 package com.github.youz.report.export.chain;
 
-import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.data.UploadCloudData;
@@ -24,12 +24,12 @@ public class UploadCloudFileExportChain extends AbstractExportChain {
 
     private final ReportTaskData reportTaskData;
 
-    private final ExportProperties exportProperties;
+    private final ReportProperties reportProperties;
 
     @Override
     void customHandler(ReportTask reportTask) {
         // 配置无需上传云存储 | 当前任务为切片任务
-        if (!exportProperties.isUploadCloud() || reportTask.getPid() > ReportConst.ZER0) {
+        if (!reportProperties.getCommon().isUploadCloud() || reportTask.getPid() > ReportConst.ZER0) {
             return;
         }
 

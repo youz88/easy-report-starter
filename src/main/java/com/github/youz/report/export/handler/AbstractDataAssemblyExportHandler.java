@@ -4,7 +4,7 @@ package com.github.youz.report.export.handler;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.DateFormatType;
 import com.github.youz.report.enums.ExecutionType;
@@ -102,7 +102,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      *
      * @param exportProperties 导出配置信息
      */
-    protected int getPageSize(ExportProperties exportProperties) {
+    protected int getPageSize(ReportProperties.ExportProperties exportProperties) {
         return exportProperties.getPageSize();
     }
 
@@ -151,7 +151,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      */
     private void appendMainData(ExcelWriter writer, WriteSheet sheet, ExportContext context) {
         // 获取导出配置信息
-        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+        ReportProperties.ExportProperties exportProperties = ApplicationContextUtil.getBean(ReportProperties.class).getExport();
 
         // 初始化开始、结束、分页大小、当前页码
         int start = (context.getSlicedIndex() - 1) * exportProperties.getSlicesTaskMaxSize();
@@ -194,9 +194,8 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
         List<Object> dataList = new ArrayList<>();
 
         // 初始化分页大小、当前页码、总计
-        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
         int pageNum = ReportConst.ONE;
-        int pageSize = getPageSize(exportProperties);
+        int pageSize = getPageSize(ApplicationContextUtil.getBean(ReportProperties.class).getExport());
         long total = context.getTotal();
 
         // 分页查询追加表体数据
@@ -256,7 +255,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      *
      * @param exportProperties 导出配置信息
      */
-    private void sleep(ExportProperties exportProperties) {
+    private void sleep(ReportProperties.ExportProperties exportProperties) {
         long asyncTaskSleepTime = exportProperties.getAsyncTaskSleepTime();
         if (asyncTaskSleepTime <= 0) {
             return;
@@ -276,7 +275,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      */
     private Integer resolveExecutionType(long total) {
         // 获取导出属性配置
-        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+        ReportProperties.ExportProperties exportProperties = ApplicationContextUtil.getBean(ReportProperties.class).getExport();
 
         // 判断导出任务总数是否大于异步任务最大数量, 如果是，则返回异步执行类型；否则返回同步执行类型
         return total > exportProperties.getAsyncTaskMaxSize() ? ExecutionType.ASYNC.getCode() : ExecutionType.SYNC.getCode();
@@ -290,7 +289,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
      */
     private Integer resolveSlicedSize(long total) {
         // 获取导出属性配置
-        ExportProperties exportProperties = ApplicationContextUtil.getBean(ExportProperties.class);
+        ReportProperties.ExportProperties exportProperties = ApplicationContextUtil.getBean(ReportProperties.class).getExport();
 
         // 计算切片数量
         int chunkNum = (int) (total / exportProperties.getSlicesTaskMaxSize());

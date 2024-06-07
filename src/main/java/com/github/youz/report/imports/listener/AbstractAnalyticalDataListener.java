@@ -13,7 +13,7 @@ import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.read.metadata.holder.ReadSheetHolder;
 import com.github.youz.report.annotation.ImportCell;
-import com.github.youz.report.config.ImportProperties;
+import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.converter.ReportConverterLoader;
 import com.github.youz.report.enums.ExceptionCode;
@@ -217,7 +217,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * @return 最大行数限制
      */
     protected Integer getLimitMaxRow() {
-        return ApplicationContextUtil.getBean(ImportProperties.class).getLimitMaxRow();
+        return ApplicationContextUtil.getBean(ReportProperties.class).getImports().getLimitMaxRow();
     }
 
 
@@ -227,7 +227,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * @return 批量处理的行数
      */
     protected int getBatchRow() {
-        return ApplicationContextUtil.getBean(ImportProperties.class).getBatchRow();
+        return ApplicationContextUtil.getBean(ReportProperties.class).getImports().getBatchRow();
     }
 
     /**

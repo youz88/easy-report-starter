@@ -11,6 +11,7 @@ public class ReportMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/" + ReportConst.EXPORT_DIRECTORY_NAME + "/");
+                .addResourceLocations("classpath:/" + ReportConst.EXPORT_DIRECTORY_NAME + "/")
+                .addResourceLocations("classpath:/" + ReportConst.IMPORT_DIRECTORY_NAME + "/");
     }
 }

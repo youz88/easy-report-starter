@@ -1,6 +1,6 @@
 package com.github.youz.report.service.impl;
 
-import com.github.youz.report.config.ExportProperties;
+import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.RedisData;
@@ -43,7 +43,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final RedisData redisData;
 
-    private final ExportProperties exportProperties;
+    private final ReportProperties reportProperties;
 
     private final CompositeExportHandler compositeExportHandler;
 
@@ -103,13 +103,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ReportInfoVO fileInfo(Long id) {
         ReportTask reportTask = reportTaskData.selectById(id);
-        return ReportInfoVO.assemblyData(reportTask, exportProperties.isUploadCloud());
+        return ReportInfoVO.assemblyData(reportTask, reportProperties.getCommon().isUploadCloud());
     }
 
     @Override
     public PageVO<ReportInfoVO> fileList(ReportListDTO reqDTO) {
         Page<ReportTask> pageInfo = reportTaskData.pageInfo(reqDTO);
-        return ReportInfoVO.assemblyData(pageInfo, exportProperties.isUploadCloud());
+        return ReportInfoVO.assemblyData(pageInfo, reportProperties.getCommon().isUploadCloud());
     }
 
     /**

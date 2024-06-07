@@ -76,6 +76,11 @@ public class ReportInfoVO {
     private String filePath;
 
     /**
+     * 导入失败文件路径(如果上传到云存储并且上传成功, 则此字段为云存储的文件路径, 否则为本地文件路径)
+     */
+    private String importFilePath;
+
+    /**
      * 执行时间(秒)
      */
     private Integer execTime;
@@ -106,7 +111,8 @@ public class ReportInfoVO {
                 .setOpTypeName(OperationType.getMessageByCode(reportTask.getOpType()))
                 .setExecTypeName(ExecutionType.getMessageByCode(reportTask.getExecType()))
                 .setStatusName(ReportStatus.getMessageByCode(reportTask.getStatus()))
-                .setFilePath(assemblyFilePath(reportTask, uploadCloud));
+                .setFilePath(assemblyFilePath(reportTask, uploadCloud))
+                .setImportFilePath(assemblyImportFailPath(reportTask));
     }
 
     /**
@@ -140,19 +146,38 @@ public class ReportInfoVO {
      * @return 组装后的文件路径
      */
     private static String assemblyFilePath(ReportTask reportTask, boolean uploadCloud) {
-        // 仅导出需展示文件路径
-        if (OperationType.EXPORT.getCode() != reportTask.getOpType()) {
-            return ReportConst.EMPTY;
-        }
-
-        // 导出文件是否上传到云存储, 是则直接返回云存储路径
-        if (uploadCloud) {
-            return StringUtil.isBlank(reportTask.getUploadFilePath())
-                    ? ReportConst.EMPTY : reportTask.getUploadFilePath();
+        if (OperationType.EXPORT.getCode() == reportTask.getOpType()) {
+            // 导出文件是否上传到云存储, 是则直接返回云存储路径
+            if (uploadCloud) {
+                return StringUtil.isBlank(reportTask.getUploadFilePath())
+                        ? ReportConst.EMPTY : reportTask.getUploadFilePath();
+            } else {
+                return StringUtil.isBlank(reportTask.getLocalFilePath())
+                        ? ReportConst.EMPTY : reportTask.getLocalFilePath().replace(ReportConst.EXPORT_ROOT_PATH, ReportConst.EMPTY);
+            }
         } else {
-            return StringUtil.isBlank(reportTask.getLocalFilePath())
-                    ? ReportConst.EMPTY : reportTask.getLocalFilePath().replace(ReportConst.EXPORT_ROOT_PATH, ReportConst.EMPTY);
+            // 优先返回云存储路径, 如果没有则返回本地文件路径
+            return StringUtil.isBlank(reportTask.getUploadFilePath())
+                    ? reportTask.getLocalFilePath()
+                    : reportTask.getUploadFilePath();
         }
     }
 
+    /**
+     * 组装导入失败文件路径
+     *
+     * @param reportTask 报表任务对象
+     * @return 导入失败文件路径
+     */
+    private static String assemblyImportFailPath(ReportTask reportTask) {
+        // 仅导入需展示失败文件路径
+        if (OperationType.IMPORTS.getCode() != reportTask.getOpType() || StringUtil.isBlank(reportTask.getFailFilePath())) {
+            return ReportConst.EMPTY;
+        }
+
+        // 如果是本地文件路径, 返回本地相对路径
+        return reportTask.getFailFilePath().startsWith(ReportConst.IMPORT_ROOT_PATH)
+                ? reportTask.getLocalFilePath().replace(ReportConst.EXPORT_ROOT_PATH, ReportConst.EMPTY)
+                : reportTask.getFailFilePath();
+    }
 }
