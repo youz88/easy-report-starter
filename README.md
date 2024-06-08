@@ -52,7 +52,7 @@
 
   当我们处理具体的导出业务时, 只需要新增业务Handler, 继承[AbstractDataAssemblyExportHandler](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/export/handler/AbstractDataAssemblyExportHandler.java), 实现抽象方法即可.
 
-  示例可参考: [OrderExportHandler](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/order/OrderExportHandler.java)
+  示例可参考: [OrderExportHandler](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/export/order/OrderExportHandler.java)
 
 - 导出模版
 
@@ -96,7 +96,7 @@
     
     ```
 
-  示例可参考: [OrderTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/order/OrderTemplate.java), [GoodsTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/goods/GoodsTemplate.java)
+  示例可参考: [OrderExportTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/export/order/OrderExportTemplate.java), [GoodsExportTemplate](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/export/goods/GoodsExportTemplate.java)
 
   关于导出模版对象, 其中内置了部份自定义注解, 用于更方便的处理导出字段格式化.
 
