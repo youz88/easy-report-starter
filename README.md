@@ -14,27 +14,27 @@
 
 ```docker
 report:
-	common:
-		# 导出文件是否上传到云存储(开启后需实现com.github.youz.report.data.UploadCloudData接口)
-	  upload-cloud: false
+  common:
+    # 导出文件是否上传到云存储(开启后需实现com.github.youz.report.data.UploadCloudData接口)
+    upload-cloud: false
   export:
-	  # 默认分页大小(用于分页查询业务数据)
-	  page-size: 100
-	  # 切片子任务所需数据最大值(如果查询导出总数超过该值, 则将数据切分成多个任务)
-	  slices-task-max-size: 500000
-	  # 异步任务执行所需数据最大值(如果查询导出总数超过该值, 将会使用定时任务执行, 否则同步导出报表文件)
-	  async-task-max-size: 200
-	  # 异步任务执行间隔时间, 单位毫秒(为避免大量异步任务持续查询对数据库造成压力, 所以可配置查询睡眠间隔时间)
-	  async-task-sleep-time: 100
-	  # 扫描待执行导出任务
-	  scan-wait-exec-cron: 0 0/2 * * * ?
-	  # 扫描待上传导出任务(仅限状态为上传失败)
-	  scan-wait-upload-cron: 0 0/3 * * * ?
-	imports:
-		# 批量处理行数
-		batch-row: 100
-		# 限制最大行数
-		limit-max-row: 20000
+    # 默认分页大小(用于分页查询业务数据)
+    page-size: 100
+    # 切片子任务所需数据最大值(如果查询导出总数超过该值, 则将数据切分成多个任务)
+    slices-task-max-size: 500000
+    # 异步任务执行所需数据最大值(如果查询导出总数超过该值, 将会使用定时任务执行, 否则同步导出报表文件)
+    async-task-max-size: 200
+    # 异步任务执行间隔时间, 单位毫秒(为避免大量异步任务持续查询对数据库造成压力, 所以可配置查询睡眠间隔时间)
+    async-task-sleep-time: 100
+    # 扫描待执行导出任务
+    scan-wait-exec-cron: 0 0/2 * * * ?
+    # 扫描待上传导出任务(仅限状态为上传失败)
+    scan-wait-upload-cron: 0 0/3 * * * ?
+  imports:
+    # 批量处理行数
+    batch-row: 100
+    # 限制最大行数
+    limit-max-row: 20000
 ```
 
 ### 报表导出
