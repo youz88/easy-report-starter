@@ -13,11 +13,12 @@ import com.github.youz.report.export.bo.ExportContext;
 import com.github.youz.report.export.bo.PreExportResult;
 import com.github.youz.report.export.handler.CompositeExportHandler;
 import com.github.youz.report.export.handler.ExportBusinessHandler;
+import com.github.youz.report.imports.bo.ImportContext;
+import com.github.youz.report.imports.listener.CompositeImportHandler;
+import com.github.youz.report.imports.listener.ImportBusinessListener;
 import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.service.ReportService;
-import com.github.youz.report.util.ExcelExportUtil;
-import com.github.youz.report.util.JsonUtil;
-import com.github.youz.report.util.MultipartFileUtil;
+import com.github.youz.report.util.*;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
@@ -27,6 +28,8 @@ import com.github.youz.report.web.vo.ReportInfoVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
@@ -46,6 +50,8 @@ public class ReportServiceImpl implements ReportService {
     private final ReportProperties reportProperties;
 
     private final CompositeExportHandler compositeExportHandler;
+
+    private final CompositeImportHandler compositeImportHandler;
 
     @Override
     public ImportFileVO importCloudFile(ImportFileDTO reqDTO) {
@@ -67,6 +73,31 @@ public class ReportServiceImpl implements ReportService {
         // 下载文件
         String localFilePath = MultipartFileUtil.downloadFile(file);
         return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(file.getOriginalFilename()));
+    }
+
+    @Async
+    @Override
+    public void asyncImport(ReportTask reportTask) {
+        // 获取导出处理器
+        ImportBusinessListener listener = compositeImportHandler.getListener(reportTask.getBusinessType());
+        try {
+            // 读取导入文件
+            listener.importFile(ImportContext.build(reportTask));
+        } catch (Exception e) {
+            log.warn("导入失败", e);
+
+            // 更新导入任务状态
+            ReportTask reportTaskDTO = new ReportTask()
+                    .setId(reportTask.getId())
+                    .setStatus(ReportStatus.IMPORT_FAIL.getCode())
+                    .setErrorMsg(e.getMessage())
+                    .setCompleteTime(DateUtil.now());
+            reportTaskData.updateById(reportTaskDTO);
+
+            // 删除导入缓存
+            String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reportTask.getUserId(), reportTask.getBusinessType());
+            ApplicationContextUtil.getBean(RedisData.class).importUnlock(cacheKey);
+        }
     }
 
     @Override
@@ -169,6 +200,11 @@ public class ReportServiceImpl implements ReportService {
 
         // 保存报表任务
         reportTaskData.insert(reportTask);
+
+        // 异步执行导入任务
+        ApplicationContextUtil.getBean(ReportService.class).asyncImport(reportTask);
+
+        // 返回导入文件VO对象
         return ImportFileVO.assemblyData(reportTask);
     }
 }

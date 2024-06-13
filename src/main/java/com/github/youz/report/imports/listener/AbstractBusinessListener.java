@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Log4j2
-public abstract class AbstractBusinessListener<T extends BasicImportTemplate> extends AbstractAnalyticalDataListener<T> {
+public abstract class AbstractBusinessListener<T extends BasicImportTemplate> extends AbstractAnalyticalDataListener<T> implements ImportBusinessListener {
 
     /**
      * 导入上下文
@@ -56,17 +57,31 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
      */
     private WriteSheet writeSheet;
 
-    public AbstractBusinessListener(Class<T> clazz, ImportContext context) {
-        super(clazz);
-        this.context = context;
-    }
-
     /**
      * 获取报表任务状态(参数校验失败)
      *
      * @return 报表任务状态
      */
     protected abstract ReportStatus customStatusByCheckFail();
+
+    /**
+     * 自定义读取导入文件
+     */
+    protected abstract void customRead();
+
+    @Override
+    public void importFile(ImportContext context) {
+        Class<T> clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+
+        // 调用父类的初始化方法，传入需要处理的类类型
+        super.initialize(clazz);
+
+        // 初始化导入上下文
+        this.context = context;
+
+        // 自定义读取导入文件
+        customRead();
+    }
 
     @Override
     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
@@ -186,13 +201,6 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
         // 表头起始行 & 表体起始行
         setHeadRowIndex(1);
         setBodyRowIndex(2);
-    }
-
-    /**
-     * 读取导入文件
-     */
-    protected void read() {
-        super.read(context.getLocalFilePath());
     }
 
     /**

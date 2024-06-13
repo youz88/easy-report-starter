@@ -3,7 +3,6 @@ package com.github.youz.report.imports.listener;
 import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.imports.bo.BasicImportTemplate;
-import com.github.youz.report.imports.bo.ImportContext;
 import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,10 +16,6 @@ import java.util.Collections;
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTemplate> extends AbstractBusinessListener<T> {
 
-    public AbstractAllSuccessBusinessListener(Class<T> clazz, ImportContext importContext) {
-        super(clazz, importContext);
-    }
-
     @Override
     protected ReportStatus customStatusByCheckFail() {
         return ReportStatus.IMPORT_FAIL;
@@ -30,7 +25,7 @@ public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTe
      * 读取并导入文件信息
      */
     @Override
-    public void read() {
+    public void customRead() {
         // 数据校验前置处理
         beforeCheckData();
         try {
@@ -61,7 +56,7 @@ public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTe
      */
     private void checkData() {
         setInvokeMethods(Collections.singletonList(ImportStep.CHECK));
-        super.read();
+        readFile(getContext().getLocalFilePath());
     }
 
     /**
@@ -69,7 +64,7 @@ public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTe
      */
     private void importData() {
         setInvokeMethods(Collections.singletonList(ImportStep.IMPORTS));
-        super.read();
+        readFile(getContext().getLocalFilePath());
     }
 
 }

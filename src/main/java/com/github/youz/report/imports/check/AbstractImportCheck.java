@@ -27,7 +27,7 @@ public abstract class AbstractImportCheck implements ImportCheck {
     public void check(Field field, String value) {
         if (StringUtil.isBlank(value)) {
             // 空值校验
-            nullCheck(field, value);
+            nullCheck(field);
         } else {
             // 自定义校验
             customCheck(field, value);
@@ -38,9 +38,8 @@ public abstract class AbstractImportCheck implements ImportCheck {
      * 进行空值校验
      *
      * @param field 字段对象
-     * @param value 字段值
      */
-    private void nullCheck(Field field, String value) {
+    private void nullCheck(Field field) {
         // 是否需要非空校验
         ImportNull importNull = AnnotatedElementUtils.findMergedAnnotation(field, ImportNull.class);
         if (importNull == null || !importNull.checkNull()) {

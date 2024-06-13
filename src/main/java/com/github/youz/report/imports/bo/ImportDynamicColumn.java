@@ -10,16 +10,6 @@ import lombok.Data;
 public class ImportDynamicColumn<T> {
 
     /**
-     * 唯一标识
-     */
-    private Object uniqueKey;
-
-    /**
-     * 表头
-     */
-    private String[] head;
-
-    /**
      * 数据
      */
     private T data;

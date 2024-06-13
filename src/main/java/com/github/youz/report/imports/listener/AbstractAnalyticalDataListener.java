@@ -100,21 +100,6 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     private List<Integer> checkFailRows;
 
     /**
-     * 构造方法
-     *
-     * @param targetClass 目标类
-     */
-    public AbstractAnalyticalDataListener(Class<T> targetClass) {
-        this.targetClass = targetClass;
-        this.data = new ArrayList<>();
-        this.sourceData = new LinkedHashMap<>();
-        this.checkFailRows = new ArrayList<>();
-
-        // 初始化目标类属性
-        this.targetFieldMap = assemblyTargetFieldMap(targetClass);
-    }
-
-    /**
      * 调用业务方参数校验方法
      *
      * @param data 源数据
@@ -143,7 +128,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      */
     @Override
     public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
-        // 判断是否为报表起始行
+        // 判断是否为报表起始行(由于excel文件起始行为1, 但是rowIndex起始值为0, 为了更好区分, 统一将rowIndex减1)
         Integer rowIndex = context.readRowHolder().getRowIndex();
         if (rowIndex != headRowIndex - 1) {
             return;
@@ -233,7 +218,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     /**
      * 文件读取
      */
-    public void read(String localFilePath) {
+    void readFile(String localFilePath) {
         try (ExcelReader excelReader = EasyExcel.read(localFilePath, this).build()) {
             // 构建一个sheet 这里可以指定名字或者no
             ReadSheet readSheet = EasyExcel.readSheet(0)
@@ -242,6 +227,21 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
             // 读取一个sheet
             excelReader.read(readSheet);
         }
+    }
+
+    /**
+     * 初始化方法，用于设置目标类并初始化相关属性
+     *
+     * @param targetClass 目标类，用于设置目标类属性
+     */
+    protected void initialize(Class<T> targetClass) {
+        this.targetClass = targetClass;
+        this.data = new ArrayList<>();
+        this.sourceData = new LinkedHashMap<>();
+        this.checkFailRows = new ArrayList<>();
+
+        // 初始化目标类属性
+        this.targetFieldMap = assemblyTargetFieldMap(targetClass);
     }
 
     /**
@@ -256,7 +256,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         Integer rowIndex = context.readRowHolder().getRowIndex();
 
         // 判断当前行是否为表体起始行
-        if (rowIndex >= bodyRowIndex - ReportConst.ONE) {
+        if (rowIndex >= bodyRowIndex - 1) {
             return Boolean.FALSE;
         }
 
@@ -286,6 +286,8 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         // 目标对象
         T target = null;
 
+        // 当前行号
+        Integer rowIndex = context.readRowHolder().getRowIndex();
         for (Map.Entry<Integer, String> entry : rowMap.entrySet()) {
             Integer columnIndex = entry.getKey();
             String value = entry.getValue();
@@ -297,14 +299,14 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
                 log.error("导入excel属性解析失败：", e);
 
                 // 追加导入失败模板信息
-                appendFailRow(context.readRowHolder().getRowIndex(), rowMap.values(), e.getMessage());
+                appendFailRow(rowIndex, rowMap.values(), e.getMessage());
                 return null;
             }
         }
 
         // 设置数据行下标
         if (target != null) {
-            target.setIndex(context.readRowHolder().getRowIndex() + ReportConst.ONE);
+            target.setIndex(rowIndex + 1);
         }
         return target;
     }
@@ -393,7 +395,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
      * @return 目标对象
      */
     private T assemblyFieldValue(Integer columnIndex, T target, String value, AnalysisContext context) throws Exception {
-        // 超出表头列,过滤该值
+        // 超出表头列,过滤该值(columnIndex起始值为0)
         if (columnIndex > targetFieldMap.size() - 1) {
             return target;
         }
@@ -406,7 +408,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
 
         // 是否已初始化
         if (Objects.isNull(target)) {
-            target = targetClass.newInstance();
+            target = createTargetInstance();
         }
 
         // 如果是动态列对象
@@ -455,9 +457,11 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
             return importCell.dynamicColumn() ? ImportDynamicColumn.build(value) : value;
         }
 
-        // 获取导入转换器实例 & 转换数据
+        // 获取导入转换器实例
         Class<? extends Converter<?>> converter = importCell.converter();
         Converter<?> converterInstance = ReportConverterLoader.loadImportConverter().get(ConverterKeyBuild.buildKey(converter));
+
+        // 转换数据(excel数据转换java数据)
         ExcelContentProperty excelContentProperty = new ExcelContentProperty();
         excelContentProperty.setField(field);
         Object convertVal = converterInstance.convertToJavaData(new ReadConverterContext<>(new ReadCellData<>(value), excelContentProperty, context));
@@ -520,4 +524,12 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
         return fieldMap;
     }
 
+    /**
+     * 创建一个目标实例对象
+     *
+     * @return 返回一个泛型类型的目标实例对象
+     */
+    private T createTargetInstance() throws Exception {
+        return targetClass.getDeclaredConstructor().newInstance();
+    }
 }

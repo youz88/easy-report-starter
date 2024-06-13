@@ -1,5 +1,6 @@
 package com.github.youz.report.service;
 
+import com.github.youz.report.model.ReportTask;
 import com.github.youz.report.web.dto.ExportFileDTO;
 import com.github.youz.report.web.dto.ImportFileDTO;
 import com.github.youz.report.web.dto.ReportListDTO;
@@ -28,6 +29,13 @@ public interface ReportService {
      * @return 导入文件VO
      */
     ImportFileVO importLocalFile(MultipartFile file, ImportFileDTO reqDTO);
+
+    /**
+     * 异步导入文件
+     *
+     * @param reportTask 报表任务
+     */
+    void asyncImport(ReportTask reportTask);
 
     /**
      * 导出文件

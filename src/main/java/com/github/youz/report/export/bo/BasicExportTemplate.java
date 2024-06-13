@@ -158,18 +158,18 @@ public class BasicExportTemplate {
             }
 
             //noinspection unchecked
-            List<DynamicColumn> items = (List<DynamicColumn>) obj;
-            for (DynamicColumn item : items) {
+            List<ExportDynamicColumn> items = (List<ExportDynamicColumn>) obj;
+            for (ExportDynamicColumn item : items) {
                 filterHead.add(StreamUtil.toList(item.getHead()));
             }
-        } else if (field.getType().isAssignableFrom(DynamicColumn.class)) {
+        } else if (field.getType().isAssignableFrom(ExportDynamicColumn.class)) {
             // 动态单表头
             Object obj = ReflectionUtils.getField(field, target);
             if (Objects.isNull(obj)) {
                 return;
             }
 
-            DynamicColumn item = (DynamicColumn) obj;
+            ExportDynamicColumn item = (ExportDynamicColumn) obj;
             filterHead.add(StreamUtil.toList(item.getHead()));
         } else {
             // 普通对象

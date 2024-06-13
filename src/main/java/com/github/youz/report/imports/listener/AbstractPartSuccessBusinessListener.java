@@ -3,7 +3,6 @@ package com.github.youz.report.imports.listener;
 import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.imports.bo.BasicImportTemplate;
-import com.github.youz.report.imports.bo.ImportContext;
 import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 
@@ -16,10 +15,6 @@ import java.util.Arrays;
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportTemplate> extends AbstractBusinessListener<T> {
 
-    public AbstractPartSuccessBusinessListener(Class<T> clazz, ImportContext importContext) {
-        super(clazz, importContext);
-    }
-
     @Override
     protected ReportStatus customStatusByCheckFail() {
         return getCheckFailRows().size() == getTotal() ? ReportStatus.IMPORT_FAIL : ReportStatus.COMPLETED;
@@ -29,7 +24,7 @@ public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportT
      * 读取并导入文件信息
      */
     @Override
-    public void read() {
+    public void customRead() {
         // 数据校验前置处理
         beforeCheckData();
         try {
@@ -51,6 +46,6 @@ public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportT
      */
     private void importData() {
         setInvokeMethods(Arrays.asList(ImportStep.CHECK, ImportStep.IMPORTS));
-        super.read();
+        readFile(getContext().getLocalFilePath());
     }
 }

@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class DynamicColumn {
+public class ExportDynamicColumn {
 
     /**
      * 唯一标识
@@ -32,8 +32,8 @@ public class DynamicColumn {
      * @param head      表头
      * @return 模板子项
      */
-    public static DynamicColumn buildHead(Object uniqueKey, String... head) {
-        return new DynamicColumn()
+    public static ExportDynamicColumn buildHead(Object uniqueKey, String... head) {
+        return new ExportDynamicColumn()
                 .setHead(head)
                 .setUniqueKey(uniqueKey);
     }
@@ -44,8 +44,8 @@ public class DynamicColumn {
      * @param data 表体
      * @return 模板子项
      */
-    public static DynamicColumn buildBody(Object data) {
-        return new DynamicColumn()
+    public static ExportDynamicColumn buildBody(Object data) {
+        return new ExportDynamicColumn()
                 .setData(data);
     }
 
