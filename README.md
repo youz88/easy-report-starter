@@ -143,7 +143,7 @@ report:
         # 业务类型(根据不同的业务类型, 加载处理器) 必填
         "businessType": 1,
         # 云端文件路径 必填
-    	  "uploadFilePath": "http://aaa/bbb/ccc/dd.xlsx"
+        loadFilePath": "http://aaa/bbb/ccc/dd.xlsx"
     }
     ```
 
