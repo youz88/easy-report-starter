@@ -31,7 +31,7 @@ public class CompositeExportHandler {
      */
     public ExportBusinessHandler getHandler(int code) {
         ExportBusinessHandler handler = handlerMap.get(code);
-        ExceptionCode.EXPORT_NO_MATCH_BUSINESS_HANDLER.assertNotNull(handler);
+        ExceptionCode.EXPORT_NO_MATCH_HANDLER.assertNotNull(handler);
         return handler;
     }
 

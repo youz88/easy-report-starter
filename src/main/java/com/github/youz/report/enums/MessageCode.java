@@ -22,7 +22,7 @@ public enum MessageCode {
 
     EXPORT_HANDLER_EMPTY("export.file.fail", "导出文件失败"),
 
-    EXPORT_NO_MATCH_BUSINESS_HANDLER("export.no.match.business.handler", "未找到业务匹配的导出处理器"),
+    EXPORT_NO_MATCH_HANDLER("export.no.match.business.handler", "未找到业务匹配的导出处理器"),
 
     EXPORT_DATA_EMPTY("export.data.empty", "导出数据为空"),
 
@@ -52,6 +52,8 @@ public enum MessageCode {
     IMPORT_ERROR_MSG_FORMAT("import.error.message.format", "导入失败错误消息格式化"),
 
     IMPORT_CELL_NOT_NULL("import.cell.not.null", "单元格不能为空"),
+
+    IMPORT_NO_MATCH_LISTENER("import.no.match.listener", "未找到业务匹配的导入监听器"),
 
     ;
 

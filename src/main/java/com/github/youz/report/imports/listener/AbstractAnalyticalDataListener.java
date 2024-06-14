@@ -47,12 +47,12 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
     /**
      * 表头起始行(默认值为 1)
      */
-    private int headRowIndex;
+    private int headRowIndex = 1;
 
     /**
      * 表体起始行(默认值为 2)
      */
-    private int bodyRowIndex;
+    private int bodyRowIndex = 2;
 
     /**
      * 导入总计条数
@@ -217,8 +217,10 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
 
     /**
      * 文件读取
+     *
+     * @param localFilePath 本地文件路径
      */
-    void readFile(String localFilePath) {
+    protected void readFile(String localFilePath) {
         try (ExcelReader excelReader = EasyExcel.read(localFilePath, this).build()) {
             // 构建一个sheet 这里可以指定名字或者no
             ReadSheet readSheet = EasyExcel.readSheet(0)

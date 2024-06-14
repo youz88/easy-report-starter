@@ -4,9 +4,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.config.ReportProperties;
-import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
-import com.github.youz.report.data.RedisData;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.data.UploadCloudData;
 import com.github.youz.report.enums.ImportStep;
@@ -22,12 +20,9 @@ import com.github.youz.report.util.StreamUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.ResolvableType;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 导入业务处理监听器
@@ -71,7 +66,8 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
 
     @Override
     public void importFile(ImportContext context) {
-        Class<T> clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        // 获取泛型类Class类型
+        Class<T> clazz = (Class<T>) ResolvableType.forClass(this.getClass()).getSuperType().getGeneric(0).resolve();
 
         // 调用父类的初始化方法，传入需要处理的类类型
         super.initialize(clazz);
@@ -172,35 +168,26 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
 
         // 更新导入任务
         ApplicationContextUtil.getBean(ReportTaskData.class).updateById(reportTask);
-
-        // 删除导入缓存
-        importUnlock(context);
     }
 
     /**
-     * 导入失败
+     * 读取文件并处理文件内容
      *
-     * @param errorMsg 失败原因
+     * @param steps 包含文件处理步骤的列表
      */
-    protected void updateFail(String errorMsg) {
-        ReportTask update = new ReportTask()
-                .setId(context.getId())
-                .setStatus(ReportStatus.IMPORT_FAIL.getCode())
-                .setErrorMsg(errorMsg)
-                .setCompleteTime(DateUtil.now());
-        ApplicationContextUtil.getBean(ReportTaskData.class).updateById(update);
+    protected void readFile(List<ImportStep> steps) {
+        // 设置调用步骤
+        super.setInvokeMethods(steps);
 
-        // 删除导入缓存
-        importUnlock(context);
+        // 调用读取文件的函数，传入本地文件路径
+        super.readFile(context.getLocalFilePath());
     }
 
     /**
      * 监听行配置
      */
     protected void listenerRowConfig() {
-        // 表头起始行 & 表体起始行
-        setHeadRowIndex(1);
-        setBodyRowIndex(2);
+        // 设置 表头起始行 & 表体起始行
     }
 
     /**
@@ -220,16 +207,6 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
         // 创建writer,sheet对象
         this.excelWriter = ExcelExportUtil.createExcelWriter(failFilePath);
         this.writeSheet = ExcelExportUtil.createWriteSheet(failHeadList, getSheetName());
-    }
-
-    /**
-     * 删除导入缓存
-     *
-     * @param context 导入上下文
-     */
-    private void importUnlock(ImportContext context) {
-        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, context.getUserId(), context.getBusinessType());
-        ApplicationContextUtil.getBean(RedisData.class).importUnlock(cacheKey);
     }
 
     /**

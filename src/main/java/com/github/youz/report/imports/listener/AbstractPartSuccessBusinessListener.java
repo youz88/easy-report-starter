@@ -27,16 +27,10 @@ public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportT
     public void customRead() {
         // 数据校验前置处理
         beforeCheckData();
-        try {
-            // 导入数据
-            importData();
-        } catch (Exception e) {
-            log.error("导入文件失败：", e);
 
-            // 更新报表任务状态
-            updateFail(e.getMessage());
-            return;
-        }
+        // 导入数据
+        importData();
+
         // 后置处理导入结果集
         afterProcess();
     }
@@ -45,7 +39,6 @@ public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportT
      * 导入数据
      */
     private void importData() {
-        setInvokeMethods(Arrays.asList(ImportStep.CHECK, ImportStep.IMPORTS));
-        readFile(getContext().getLocalFilePath());
+        readFile(Arrays.asList(ImportStep.CHECK, ImportStep.IMPORTS));
     }
 }

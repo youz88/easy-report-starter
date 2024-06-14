@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -55,24 +56,14 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ImportFileVO importCloudFile(ImportFileDTO reqDTO) {
-        // 校验是否已有导入任务在执行中
-        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
-        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
-
-        // 下载文件
-        String localFilePath = MultipartFileUtil.downloadFile(reqDTO.getUploadFilePath());
-        return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(reqDTO.getUploadFilePath()));
+        return importFile(reqDTO, MultipartFileUtil.getFileName(reqDTO.getUploadFilePath()),
+                () -> MultipartFileUtil.downloadFile(reqDTO.getUploadFilePath()));
     }
 
     @Override
     public ImportFileVO importLocalFile(MultipartFile file, ImportFileDTO reqDTO) {
-        // 校验是否已有导入任务在执行中
-        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
-        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
-
-        // 下载文件
-        String localFilePath = MultipartFileUtil.downloadFile(file);
-        return importFile(reqDTO, localFilePath, MultipartFileUtil.getFileName(file.getOriginalFilename()));
+        return importFile(reqDTO, MultipartFileUtil.getFileName(file.getOriginalFilename()),
+                () -> MultipartFileUtil.downloadFile(file));
     }
 
     @Async
@@ -84,16 +75,16 @@ public class ReportServiceImpl implements ReportService {
             // 读取导入文件
             listener.importFile(ImportContext.build(reportTask));
         } catch (Exception e) {
-            log.warn("导入失败", e);
+            log.warn("导入文件失败", e);
 
             // 更新导入任务状态
-            ReportTask reportTaskDTO = new ReportTask()
+            ReportTask update = new ReportTask()
                     .setId(reportTask.getId())
                     .setStatus(ReportStatus.IMPORT_FAIL.getCode())
                     .setErrorMsg(e.getMessage())
                     .setCompleteTime(DateUtil.now());
-            reportTaskData.updateById(reportTaskDTO);
-
+            reportTaskData.updateById(update);
+        } finally {
             // 删除导入缓存
             String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reportTask.getUserId(), reportTask.getBusinessType());
             ApplicationContextUtil.getBean(RedisData.class).importUnlock(cacheKey);
@@ -182,12 +173,17 @@ public class ReportServiceImpl implements ReportService {
     /**
      * 导入文件
      *
-     * @param reqDTO        导入文件所需的请求参数
-     * @param localFilePath 本地文件路径
-     * @param fileName      文件名
+     * @param reqDTO                导入文件所需的请求参数
+     * @param fileName              文件名
+     * @param localFilePathSupplier 用于获取本地文件路径的Supplier对象
      * @return 导入文件的VO对象
      */
-    private ImportFileVO importFile(ImportFileDTO reqDTO, String localFilePath, String fileName) {
+    private ImportFileVO importFile(ImportFileDTO reqDTO, String fileName, Supplier<String> localFilePathSupplier) {
+        // 导入前检查
+        importPreCheck(reqDTO);
+
+        // 获取本地文件路径
+        String localFilePath = localFilePathSupplier.get();
         ExceptionCode.IMPORT_DOWNLOAD_FAIL.assertIsTrue(StringUtil.isNotBlank(localFilePath));
 
         // 初始化报表任务
@@ -206,5 +202,16 @@ public class ReportServiceImpl implements ReportService {
 
         // 返回导入文件VO对象
         return ImportFileVO.assemblyData(reportTask);
+    }
+
+    /**
+     * 导入前检查
+     *
+     * @param reqDTO 导入文件请求参数
+     */
+    private void importPreCheck(ImportFileDTO reqDTO) {
+        // 校验是否已有导入任务在执行中
+        String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
+        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
     }
 }

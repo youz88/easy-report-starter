@@ -28,25 +28,19 @@ public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTe
     public void customRead() {
         // 数据校验前置处理
         beforeCheckData();
-        try {
-            // 数据校验
-            checkData();
 
-            // 数据校验是否失败
-            if (CollectionUtils.isEmpty(getCheckFailRows())) {
-                // 数据导入前置处理
-                beforeImportData();
+        // 数据校验
+        checkData();
 
-                // 导入数据
-                importData();
-            }
-        } catch (Exception e) {
-            log.error("导入文件失败：", e);
+        // 数据校验是否失败
+        if (CollectionUtils.isEmpty(getCheckFailRows())) {
+            // 数据导入前置处理
+            beforeImportData();
 
-            // 更新报表任务状态
-            updateFail(e.getMessage());
-            return;
+            // 导入数据
+            importData();
         }
+
         // 后置处理导入结果集
         afterProcess();
     }
@@ -55,16 +49,14 @@ public abstract class AbstractAllSuccessBusinessListener<T extends BasicImportTe
      * 导入参数校验
      */
     private void checkData() {
-        setInvokeMethods(Collections.singletonList(ImportStep.CHECK));
-        readFile(getContext().getLocalFilePath());
+        readFile(Collections.singletonList(ImportStep.CHECK));
     }
 
     /**
      * 导入数据
      */
     private void importData() {
-        setInvokeMethods(Collections.singletonList(ImportStep.IMPORTS));
-        readFile(getContext().getLocalFilePath());
+        readFile(Collections.singletonList(ImportStep.IMPORTS));
     }
 
 }

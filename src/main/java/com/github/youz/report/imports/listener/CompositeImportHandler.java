@@ -31,7 +31,7 @@ public class CompositeImportHandler {
      */
     public ImportBusinessListener getListener(int code) {
         ImportBusinessListener handler = listenerMap.get(code);
-        ExceptionCode.EXPORT_NO_MATCH_BUSINESS_HANDLER.assertNotNull(handler);
+        ExceptionCode.IMPORT_NO_MATCH_LISTENER.assertNotNull(handler);
         return handler;
     }
 
