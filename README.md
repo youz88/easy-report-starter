@@ -1,4 +1,4 @@
-# easy-report
+# easy-report-starter
 
 ## 项目简介
 
