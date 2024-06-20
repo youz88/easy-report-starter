@@ -2,6 +2,7 @@ package com.github.youz.report.util;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ExecutionType;
@@ -89,9 +90,10 @@ public class ExcelExportUtil {
      * 创建ExcelWriter对象
      *
      * @param localFilePath 本地文件路径
+     * @param excelType     Excel文件类型枚举
      * @return ExcelWriter
      */
-    public static ExcelWriter createExcelWriter(String localFilePath) {
+    public static ExcelWriter createExcelWriter(String localFilePath, ExcelTypeEnum excelType) {
         File localFile = new File(localFilePath);
         File tempDirectory = localFile.getParentFile();
 
@@ -102,7 +104,9 @@ public class ExcelExportUtil {
         }
 
         // 创建ExcelWriter对象并返回
-        return EasyExcel.write(localFile).build();
+        return EasyExcel.write(localFile)
+                .excelType(excelType)
+                .build();
     }
 
     /**

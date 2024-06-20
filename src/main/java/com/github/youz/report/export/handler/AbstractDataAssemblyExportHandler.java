@@ -117,6 +117,13 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     }
 
     /**
+     * 返回Excel文件类型枚举值
+     */
+    public ExcelTypeEnum excelType() {
+        return ExcelTypeEnum.XLSX;
+    }
+
+    /**
      * 生成报表文件
      *
      * @param context    任务上下文
@@ -128,7 +135,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
         String localFilePath = buildLocalFilePath(context.getDirectoryName(), context.getFileName());
 
         // 创建ExcelWriter对象(try-with-resources)
-        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(localFilePath)) {
+        try (ExcelWriter writer = ExcelExportUtil.createExcelWriter(localFilePath, excelType())) {
             // 创建sheet对象
             WriteSheet sheet = ExcelExportUtil.createWriteSheet(exportHead.getHeadList(), generateSheetName(context));
 
@@ -247,7 +254,7 @@ public abstract class AbstractDataAssemblyExportHandler implements ExportBusines
     private String buildLocalFilePath(String directoryName, String fileName) {
         return String.join(File.separator, ReportConst.EXPORT_ROOT_PATH,
                 businessType().name().toLowerCase(), directoryName, fileName)
-                + ExcelTypeEnum.XLSX.getValue();
+                + excelType().getValue();
     }
 
     /**

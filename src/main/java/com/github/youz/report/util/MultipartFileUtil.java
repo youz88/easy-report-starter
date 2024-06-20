@@ -61,12 +61,6 @@ public class MultipartFileUtil {
         return localFilePath;
     }
 
-    public static void main(String[] args) {
-        String uploadFilePath = "http://192.168.3.11:8080/import/2021.xlsx";
-        String substring = uploadFilePath.substring(uploadFilePath.lastIndexOf(ReportConst.SLASH_SYMBOL) + 1);
-        System.out.println(substring);
-    }
-
     /**
      * 下载上传文件至本地
      *
@@ -94,7 +88,7 @@ public class MultipartFileUtil {
             URL url = new URL(uploadFilePath);
             conn = url.openConnection();
         } catch (Exception e) {
-            log.error("上传文件地址链接[{}]错误", uploadFilePath, e);
+            log.error("上传云文件地址[{}]错误", uploadFilePath, e);
             return null;
         }
 
@@ -105,7 +99,7 @@ public class MultipartFileUtil {
                 os.write(buffer, 0, byteread);
             }
         } catch (IOException e) {
-            log.error("文件下载失败：", e);
+            log.error("云文件下载失败", e);
             return null;
         }
         return localFilePath;

@@ -2,6 +2,7 @@ package com.github.youz.report.imports.listener;
 
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.ReportConst;
@@ -205,7 +206,7 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
                 + localFilePath.substring(localFilePath.lastIndexOf(ReportConst.FULL_STOP_SYMBOL));
 
         // 创建writer,sheet对象
-        this.excelWriter = ExcelExportUtil.createExcelWriter(failFilePath);
+        this.excelWriter = ExcelExportUtil.createExcelWriter(failFilePath, ExcelTypeEnum.XLSX);
         this.writeSheet = ExcelExportUtil.createWriteSheet(failHeadList, getSheetName());
     }
 
@@ -220,7 +221,7 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
     private List<Object> assemblyFailRow(Integer rowIndex, Collection<String> source, String message) {
         List<Object> list = new ArrayList<>(source);
         // 如果该行为表头行, 无需填写失败原因
-        if (rowIndex < getBodyRowIndex() - ReportConst.ONE) {
+        if (rowIndex < getBodyRowIndex() - 1) {
             return list;
         }
 
