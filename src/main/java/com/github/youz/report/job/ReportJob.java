@@ -4,21 +4,22 @@ import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.model.ReportTask;
+import com.github.youz.report.service.ReportService;
 import com.github.youz.report.util.ExcelExportUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Component
 @RequiredArgsConstructor
 public class ReportJob {
 
     private final ReportTaskData reportTaskData;
+
+    private final ReportService reportService;
 
     /**
      * 扫描待执行导出任务
@@ -38,7 +39,7 @@ public class ReportJob {
             // 判断当前任务是否为分片任务, 分片任务由于数据量较大，使用异步线程池执行
             if (reportTask.getPid() > ReportConst.ZER0) {
                 // 如果是分片任务，则使用异步线程池执行
-                CompletableFuture.runAsync(() -> ExcelExportUtil.jobExport(reportTask));
+                reportService.asyncExport(reportTask);
             } else {
                 // 同步执行
                 ExcelExportUtil.jobExport(reportTask);

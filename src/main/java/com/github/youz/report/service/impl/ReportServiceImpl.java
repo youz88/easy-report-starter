@@ -91,6 +91,12 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    @Async
+    @Override
+    public void asyncExport(ReportTask reportTask) {
+        ExcelExportUtil.jobExport(reportTask);
+    }
+
     @Override
     public void exportFile(ExportFileDTO reqDTO, HttpServletResponse response) {
         // 获取导出处理器

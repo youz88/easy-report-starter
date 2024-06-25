@@ -5,14 +5,12 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 配置类
  */
 @Configuration
-@EnableAsync
 @EnableScheduling
 @MapperScan("com.github.youz.report.repository")
 @ComponentScan(basePackages = "com.github.youz.report")

@@ -38,6 +38,13 @@ public interface ReportService {
     void asyncImport(ReportTask reportTask);
 
     /**
+     * 异步导出文件
+     *
+     * @param reportTask 报表任务
+     */
+    void asyncExport(ReportTask reportTask);
+
+    /**
      * 导出文件
      *
      * @param reqDTO   导出文件请求DTO
