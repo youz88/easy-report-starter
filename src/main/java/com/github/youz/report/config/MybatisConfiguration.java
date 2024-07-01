@@ -1,14 +1,14 @@
 package com.github.youz.report.config;
 
 import com.mybatisflex.core.audit.AuditManager;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * mybatis-flex sql 打印配置
  */
-@Log4j2
+@Slf4j
 @Configuration
 @ConditionalOnProperty(prefix = "spring.profiles", name = "active", havingValue = "dev")
 public class MybatisConfiguration {

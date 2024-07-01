@@ -4,14 +4,14 @@ import com.github.youz.report.enums.ImportStep;
 import com.github.youz.report.enums.ReportStatus;
 import com.github.youz.report.imports.bo.BasicImportTemplate;
 import lombok.EqualsAndHashCode;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
 /**
  * 允许部分成功失败
  */
-@Log4j2
+@Slf4j
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractPartSuccessBusinessListener<T extends BasicImportTemplate> extends AbstractBusinessListener<T> {
 

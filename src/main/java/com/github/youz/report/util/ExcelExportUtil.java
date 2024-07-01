@@ -17,7 +17,7 @@ import com.github.youz.report.web.vo.ExportFileVO;
 import com.github.youz.report.web.vo.Result;
 import com.mybatisflex.core.util.ArrayUtil;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * 报表导出工具类
  */
-@Log4j2
+@Slf4j
 public class ExcelExportUtil {
 
     /**
@@ -138,7 +138,7 @@ public class ExcelExportUtil {
                     .doWrite(syncExportResult.getDataList());
         } catch (Exception e) {
             // 如果出现异常，记录错误日志 & 抛出异常
-            log.error("导出文件失败", e);
+            log.error("Failed to export file", e);
             ExceptionCode.EXPORT_FILE_FAIL.throwException();
         }
     }

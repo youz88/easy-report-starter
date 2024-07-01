@@ -27,7 +27,7 @@ import com.github.youz.report.util.StreamUtil;
 import com.mybatisflex.core.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-@Log4j2
+@Slf4j
 public abstract class AbstractAnalyticalDataListener<T extends BasicImportTemplate> extends AnalysisEventListener<Map<Integer, String>> {
 
     /**
@@ -298,7 +298,7 @@ public abstract class AbstractAnalyticalDataListener<T extends BasicImportTempla
             try {
                 target = assemblyFieldValue(columnIndex, target, value, context);
             } catch (Exception e) {
-                log.error("导入excel属性解析失败：", e);
+                log.error("Failed to import excel attribute parsing", e);
 
                 // 追加导入失败模板信息
                 appendFailRow(rowIndex, rowMap.values(), e.getMessage());

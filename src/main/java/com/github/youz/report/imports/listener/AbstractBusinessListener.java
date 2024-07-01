@@ -20,17 +20,20 @@ import com.github.youz.report.util.ExcelExportUtil;
 import com.github.youz.report.util.StreamUtil;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ResolvableType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 导入业务处理监听器
  */
 @Getter
 @Setter
-@Log4j2
+@Slf4j
 public abstract class AbstractBusinessListener<T extends BasicImportTemplate> extends AbstractAnalyticalDataListener<T> implements ImportBusinessListener {
 
     /**
@@ -157,7 +160,7 @@ public abstract class AbstractBusinessListener<T extends BasicImportTemplate> ex
                 try {
                     failFilePath = ApplicationContextUtil.getBean(UploadCloudData.class).uploadFile(failFilePath);
                 } catch (Exception e) {
-                    log.error("上传失败文件到云存储异常", e);
+                    log.error("Upload failed files to cloud storage exception", e);
                 }
             }
 

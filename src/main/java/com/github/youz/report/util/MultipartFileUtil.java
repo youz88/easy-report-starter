@@ -2,7 +2,7 @@ package com.github.youz.report.util;
 
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.enums.DateFormatType;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * 文件工具类
  */
-@Log4j2
+@Slf4j
 public class MultipartFileUtil {
 
     /**
@@ -55,7 +55,7 @@ public class MultipartFileUtil {
             // 文件下载
             uploadFile.transferTo(new File(localFilePath));
         } catch (IOException e) {
-            log.error("文件下载失败：", e);
+            log.error("File download failed", e);
             return null;
         }
         return localFilePath;
@@ -88,7 +88,7 @@ public class MultipartFileUtil {
             URL url = new URL(uploadFilePath);
             conn = url.openConnection();
         } catch (Exception e) {
-            log.error("上传云文件地址[{}]错误", uploadFilePath, e);
+            log.error("Upload cloud file address error [{}]", uploadFilePath, e);
             return null;
         }
 
@@ -99,7 +99,7 @@ public class MultipartFileUtil {
                 os.write(buffer, 0, byteread);
             }
         } catch (IOException e) {
-            log.error("云文件下载失败", e);
+            log.error("Cloud file download failed", e);
             return null;
         }
         return localFilePath;

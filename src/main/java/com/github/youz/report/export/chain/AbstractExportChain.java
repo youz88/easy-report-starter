@@ -2,14 +2,14 @@ package com.github.youz.report.export.chain;
 
 import com.github.youz.report.constant.ReportConst;
 import com.github.youz.report.model.ReportTask;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 
 /**
  * 导出链抽象类
  */
-@Log4j2
+@Slf4j
 public abstract class AbstractExportChain implements ExportChain {
 
     /**
@@ -30,7 +30,7 @@ public abstract class AbstractExportChain implements ExportChain {
             // 自定义处理
             customHandler(reportTask);
         } catch (Exception e) {
-            log.error("导出失败", e);
+            log.error("Export failed", e);
 
             // 异常处理
             failBack(reportTask, e);

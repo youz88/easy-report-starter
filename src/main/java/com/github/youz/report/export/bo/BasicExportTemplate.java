@@ -5,7 +5,7 @@ import com.github.youz.report.converter.ReportConverterLoader;
 import com.github.youz.report.util.StreamUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * 基础导出模版
  */
-@Log4j2
+@Slf4j
 @Data
 @Accessors(chain = true)
 public class BasicExportTemplate {

@@ -2,7 +2,7 @@ package com.github.youz.report.util;
 
 import com.github.youz.report.constant.ReportConst;
 import com.mybatisflex.core.util.StringUtil;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * 压缩工具类
  */
-@Log4j2
+@Slf4j
 public class ZipUtil {
 
     /**
@@ -75,7 +75,7 @@ public class ZipUtil {
                 input.close();
             }
         } catch (Exception e) {
-            log.error("生成压缩文件失败：", e);
+            log.error("Failed to generate compressed file", e);
         }
     }
 }
