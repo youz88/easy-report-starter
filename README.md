@@ -80,7 +80,7 @@ POST http://localhost:8080/report/export
 }
 ```
 
-返回结果根据属性`com.github.youz.report.config.ReportProperties.ExportProperties#asyncTaskMaxSize`区分为两种方式, 根据查询数据的总量, 系统将决定采用同步或异步方式导出报表.
+返回结果根据属性[ReportProperties#asyncTaskMaxSize](https://github.com/youz88/easy-report-starter/blob/dbeec8f9429f81546ee8039f6fa001e13cbaa73e/src/main/java/com/github/youz/report/config/ReportProperties.java#L73)区分为两种方式, 根据查询数据的总量, 系统将决定采用同步或异步方式导出报表.
 
 **业务导出处理器**
 
@@ -132,7 +132,7 @@ Content-Type: application/json
 
 **导入监听器**
 
-只需要新增业务Listener, 继承[AbstractPartSuccessBusinessListener](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/imports/listener/AbstractPartSuccessBusinessListener.java)或[AbstractAllSuccessBusinessListener](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/imports/listener/AbstractAllSuccessBusinessListener.java), 实现抽象方法即可处理导入业务。
+只需要新增业务Listener, 继承[AbstractPartSuccessBusinessListener](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/imports/listener/AbstractPartSuccessBusinessListener.java)或[AbstractAllSuccessBusinessListener](https://github.com/youz88/easy-report/blob/main/src/main/java/com/github/youz/report/imports/listener/AbstractAllSuccessBusinessListener.java), 实现抽象方法即可处理导入业务.
 
 - 示例: [DynamicImportListener](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/imports/dynamic/DynamicImportListener.java), [GoodsImportListener](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/imports/goods/GoodsImportListener.java), [OrderImportListener](https://github.com/youz88/easy-report-server/blob/main/src/main/java/com/github/youz/server/business/imports/order/OrderImportListener.java)
 
