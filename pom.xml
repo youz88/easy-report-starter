@@ -16,7 +16,7 @@
         <hikaricp.version>4.0.3</hikaricp.version>
         <mysql-connector.version>8.3.0</mysql-connector.version>
         <easyexcel.version>3.3.2</easyexcel.version>
-        <guava.version>31.1-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
     </properties>
     <dependencies>
 
