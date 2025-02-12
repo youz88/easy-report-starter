@@ -16,6 +16,7 @@
         <hikaricp.version>4.0.3</hikaricp.version>
         <mysql-connector.version>8.3.0</mysql-connector.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <guava.version>31.1-jre</guava.version>
     </properties>
     <dependencies>
 
@@ -43,12 +44,21 @@
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
             </exclusions>
+            <optional>true</optional>
         </dependency>
 
         <!-- Json Tool-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Guava-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
             <optional>true</optional>
         </dependency>
 
