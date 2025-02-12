@@ -1,5 +1,6 @@
 package com.github.youz.report.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@ConditionalOnClass(RedisTemplate.class)
 public class ReportRedisConfiguration {
 
     @Bean
@@ -19,9 +21,7 @@ public class ReportRedisConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(
-            name = {"redisTemplate"}
-    )
+    @ConditionalOnMissingBean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory, RedisSerializer<Object> jackson2JsonRedisSerializer) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);

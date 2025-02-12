@@ -1,9 +1,9 @@
 package com.github.youz.report.service.impl;
 
+import com.github.youz.report.cache.CacheService;
 import com.github.youz.report.config.ReportProperties;
 import com.github.youz.report.constant.CacheConst;
 import com.github.youz.report.constant.ReportConst;
-import com.github.youz.report.data.RedisData;
 import com.github.youz.report.data.ReportTaskData;
 import com.github.youz.report.enums.ExceptionCode;
 import com.github.youz.report.enums.ExecutionType;
@@ -46,7 +46,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportTaskData reportTaskData;
 
-    private final RedisData redisData;
+    private final CacheService cacheService;
 
     private final ReportProperties reportProperties;
 
@@ -87,7 +87,7 @@ public class ReportServiceImpl implements ReportService {
         } finally {
             // 删除导入缓存
             String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reportTask.getUserId(), reportTask.getBusinessType());
-            ApplicationContextUtil.getBean(RedisData.class).importUnlock(cacheKey);
+            cacheService.unlock(cacheKey);
         }
     }
 
@@ -218,6 +218,6 @@ public class ReportServiceImpl implements ReportService {
     private void importPreCheck(ImportFileDTO reqDTO) {
         // 校验是否已有导入任务在执行中
         String cacheKey = String.format(CacheConst.REPORT_IMPORT_KEY, reqDTO.getUserId(), reqDTO.getBusinessType());
-        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(redisData.importLock(cacheKey));
+        ExceptionCode.IMPORT_IN_PROGRESS.assertIsTrue(cacheService.lock(cacheKey));
     }
 }
