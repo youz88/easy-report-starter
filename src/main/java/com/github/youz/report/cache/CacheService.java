@@ -3,10 +3,10 @@ package com.github.youz.report.cache;
 public interface CacheService {
 
     /**
-     * 锁定指定的键
+     * 锁定指定的键<br>
+     * 仅用了最简单是实现方式, 因为添加了锁失效时间, 所以这里并未过多考虑死锁问题, 因是并发量不高且允许短暂等待的业务场景
      *
      * @param key 需要锁定的键
-     * @return 如果锁定成功，则返回 true；否则返回 false
      */
     Boolean lock(String key);
 
